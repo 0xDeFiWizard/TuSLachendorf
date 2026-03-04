@@ -6,168 +6,120 @@
 <meta name="theme-color" content="#0f1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Vereinskasse">
+<meta name="apple-mobile-web-app-title" content="TuS Lachendorf">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.svg">
-<title>Vereinskasse</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>TuS Lachendorf</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:       #0f1117;
-  --surface:  #171b24;
-  --card:     #1e2330;
-  --border:   #2a3040;
-  --accent:   #3b82f6;
-  --green:    #22c55e;
-  --red:      #ef4444;
-  --orange:   #f59e0b;
-  --purple:   #a855f7;
-  --text:     #f1f5f9;
-  --muted:    #64748b;
-  --radius:   16px;
-  --radius-sm:10px;
-}
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body { height:100%; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); overscroll-behavior:none; }
-
-/* ── LAYOUT ── */
-#app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
-#screen { flex:1; overflow-y:auto; padding:16px 16px 90px; scroll-behavior:smooth; }
-#screen::-webkit-scrollbar { display:none; }
-
-/* ── TOPBAR ── */
-.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; }
-.topbar-title { font-size:20px; font-weight:700; letter-spacing:-0.5px; }
-.topbar-sub { font-size:12px; color:var(--muted); margin-top:2px; }
-.avatar { width:38px; height:38px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; cursor:pointer; }
-
-/* ── BOTTOM NAV ── */
-.nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:8px 0 max(8px, env(safe-area-inset-bottom)); z-index:100; }
-.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 0; cursor:pointer; transition:color .2s; color:var(--muted); font-size:10px; font-weight:500; border:none; background:none; }
-.nav-item.active { color:var(--accent); }
-.nav-item svg { width:22px; height:22px; stroke-width:1.8; }
-
-/* ── CARDS ── */
-.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
-.card-sm { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; }
-
-/* ── KPI GRID ── */
-.kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-.kpi { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; position:relative; overflow:hidden; }
-.kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-.kpi.blue::before { background:var(--accent); }
-.kpi.green::before { background:var(--green); }
-.kpi.red::before { background:var(--red); }
-.kpi.orange::before { background:var(--orange); }
-.kpi-label { font-size:10px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
-.kpi-value { font-size:22px; font-weight:700; letter-spacing:-1px; font-family:'DM Mono',monospace; }
-.kpi.blue .kpi-value { color:var(--accent); }
-.kpi.green .kpi-value { color:var(--green); }
-.kpi.red .kpi-value { color:var(--red); }
-.kpi.orange .kpi-value { color:var(--orange); }
-
-/* ── SECTION HEADER ── */
-.sec { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin:20px 0 10px; }
-
-/* ── LIST ITEMS ── */
-.list-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
-.list-item:last-child { border-bottom:none; }
-.list-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; }
-.list-icon.green { background:rgba(34,197,94,.15); }
-.list-icon.red { background:rgba(239,68,68,.15); }
-.list-icon.orange { background:rgba(245,158,11,.15); }
-.list-icon.blue { background:rgba(59,130,246,.15); }
-.list-body { flex:1; min-width:0; }
-.list-title { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.list-sub { font-size:12px; color:var(--muted); margin-top:1px; }
-.list-right { text-align:right; flex-shrink:0; }
-.list-amount { font-size:14px; font-weight:700; font-family:'DM Mono',monospace; }
-.list-amount.green { color:var(--green); }
-.list-amount.red { color:var(--red); }
-.list-amount.orange { color:var(--orange); }
-.list-date { font-size:11px; color:var(--muted); margin-top:1px; }
-
-/* ── BADGE ── */
-.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; }
-.badge.green { background:rgba(34,197,94,.15); color:var(--green); }
-.badge.red { background:rgba(239,68,68,.15); color:var(--red); }
-.badge.orange { background:rgba(245,158,11,.15); color:var(--orange); }
-.badge.blue { background:rgba(59,130,246,.15); color:var(--accent); }
-
-/* ── BUTTONS ── */
-.btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 20px; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; border:none; cursor:pointer; transition:opacity .15s, transform .1s; width:100%; }
-.btn:active { transform:scale(.97); opacity:.85; }
-.btn-primary { background:var(--accent); color:#fff; }
-.btn-green { background:var(--green); color:#fff; }
-.btn-orange { background:var(--orange); color:#fff; }
-.btn-red { background:var(--red); color:#fff; }
-.btn-ghost { background:var(--card); color:var(--text); border:1px solid var(--border); }
-.btn-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
-
-/* ── FAB ── */
-.fab { position:fixed; bottom:76px; right:16px; width:54px; height:54px; border-radius:50%; background:var(--accent); border:none; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(59,130,246,.4); cursor:pointer; z-index:99; transition:transform .15s; }
-.fab:active { transform:scale(.9); }
-.fab svg { width:24px; height:24px; color:#fff; }
-
-/* ── MODAL ── */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .25s; }
-.modal-overlay.open { opacity:1; pointer-events:all; }
-.modal { background:var(--surface); border-radius:24px 24px 0 0; padding:20px 20px max(20px,env(safe-area-inset-bottom)); width:100%; max-height:90vh; overflow-y:auto; transform:translateY(100%); transition:transform .3s cubic-bezier(.34,1.2,.64,1); }
-.modal-overlay.open .modal { transform:translateY(0); }
-.modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
-.modal-title { font-size:18px; font-weight:700; margin-bottom:16px; }
-
-/* ── FORM ── */
-.form-group { margin-bottom:14px; }
-.form-label { font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; display:block; }
-.form-input { width:100%; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; outline:none; transition:border-color .2s; -webkit-appearance:none; }
-.form-input:focus { border-color:var(--accent); }
-.form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:38px; }
-.form-input::placeholder { color:var(--muted); }
-option { background:var(--card); }
-
-/* ── PROGRESS ── */
-.progress-bar { background:var(--border); border-radius:4px; height:8px; overflow:hidden; margin-top:8px; }
-.progress-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--orange),var(--green)); transition:width .5s ease; }
-
-/* ── SPIELER AVATAR ── */
-.player-avatar { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
-
-/* ── NOTIFICATION DOT ── */
-.notif-dot { width:8px; height:8px; border-radius:50%; background:var(--red); position:absolute; top:6px; right:6px; }
-
-/* ── EMPTY STATE ── */
-.empty { text-align:center; padding:40px 20px; color:var(--muted); }
-.empty-icon { font-size:40px; margin-bottom:12px; }
-.empty-text { font-size:14px; }
-
-/* ── TOAST ── */
-.toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green); color:#fff; padding:12px 20px; border-radius:12px; font-size:14px; font-weight:600; z-index:300; opacity:0; transition:all .3s; white-space:nowrap; pointer-events:none; }
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-.toast.error { background:var(--red); }
-
-/* ── ANIMATIONS ── */
-@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-.fade-in { animation:fadeIn .3s ease forwards; }
-
-/* ── CHART ── */
-.chart-bar-wrap { display:flex; align-items:flex-end; gap:6px; height:80px; margin-top:12px; }
-.chart-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
-.chart-bar { width:100%; border-radius:4px 4px 0 0; transition:height .5s ease; min-height:2px; }
-.chart-label { font-size:9px; color:var(--muted); }
-
-/* ── SWITCH ── */
-.switch-row { display:flex; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:4px; gap:4px; margin-bottom:14px; }
-.switch-opt { flex:1; padding:8px; text-align:center; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; color:var(--muted); }
-.switch-opt.active { background:var(--accent); color:#fff; }
+:root{--bg:#0f1117;--surface:#171b24;--card:#1e2330;--border:#2a3040;--accent:#3b82f6;--green:#22c55e;--red:#ef4444;--orange:#f59e0b;--text:#f1f5f9;--muted:#64748b;--radius:16px;--radius-sm:10px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overscroll-behavior:none}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+#screen{flex:1;overflow-y:auto;padding:16px 16px 90px}
+#screen::-webkit-scrollbar{display:none}
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:32px;background:var(--bg)}
+.login-logo{font-size:64px;margin-bottom:16px}
+.login-title{font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
+.login-sub{font-size:14px;color:var(--muted);margin-bottom:40px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:360px}
+.login-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:block}
+.login-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;color:var(--text);font-size:22px;outline:none;-webkit-appearance:none;font-family:'DM Sans',sans-serif;letter-spacing:3px;text-align:center;margin-bottom:16px;transition:border-color .2s}
+.login-input:focus{border-color:var(--accent)}
+.login-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.login-btn:active{opacity:.8}
+.login-error{color:var(--red);font-size:13px;text-align:center;margin-top:10px;min-height:20px}
+.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 0}
+.topbar-title{font-size:20px;font-weight:700;letter-spacing:-.5px}
+.topbar-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;cursor:pointer;flex-shrink:0;border:none}
+.avatar.admin{background:var(--orange);color:#fff}
+.avatar.user{background:var(--accent);color:#fff}
+.nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;cursor:pointer;transition:color .2s;color:var(--muted);font-size:10px;font-weight:500;border:none;background:none}
+.nav-item.active{color:var(--accent)}
+.nav-item svg{width:22px;height:22px;stroke-width:1.8}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card-sm{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.blue::before{background:var(--accent)}.kpi.green::before{background:var(--green)}.kpi.red::before{background:var(--red)}.kpi.orange::before{background:var(--orange)}
+.kpi-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-value{font-size:20px;font-weight:700;letter-spacing:-1px;font-family:'DM Mono',monospace}
+.kpi.blue .kpi-value{color:var(--accent)}.kpi.green .kpi-value{color:var(--green)}.kpi.red .kpi-value{color:var(--red)}.kpi.orange .kpi-value{color:var(--orange)}
+.sec{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.list-item:last-child{border-bottom:none}
+.list-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.list-icon.green{background:rgba(34,197,94,.15)}.list-icon.red{background:rgba(239,68,68,.15)}.list-icon.orange{background:rgba(245,158,11,.15)}
+.list-body{flex:1;min-width:0}
+.list-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.list-right{text-align:right;flex-shrink:0}
+.list-amount{font-size:14px;font-weight:700;font-family:'DM Mono',monospace}
+.list-amount.green{color:var(--green)}.list-amount.red{color:var(--red)}.list-amount.orange{color:var(--orange)}
+.list-date{font-size:11px;color:var(--muted);margin-top:1px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge.green{background:rgba(34,197,94,.15);color:var(--green)}.badge.red{background:rgba(239,68,68,.15);color:var(--red)}.badge.orange{background:rgba(245,158,11,.15);color:var(--orange)}.badge.blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s,transform .1s;width:100%}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-primary{background:var(--accent);color:#fff}.btn-green{background:var(--green);color:#fff}.btn-orange{background:var(--orange);color:#fff}.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.fab{position:fixed;bottom:76px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(59,130,246,.4);cursor:pointer;z-index:99;transition:transform .15s}
+.fab:active{transform:scale(.9)}
+.fab svg{width:24px;height:24px;color:#fff}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));width:100%;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.2,.64,1)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-input:focus{border-color:var(--accent)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+.form-input::placeholder{color:var(--muted)}
+option{background:var(--card)}
+.progress-bar{background:var(--border);border-radius:4px;height:8px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--green));transition:width .5s ease}
+.player-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:var(--red)}
+.switch-row{display:flex;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;gap:4px;margin-bottom:14px}
+.switch-opt{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted)}
+.switch-opt.active{background:var(--accent);color:#fff}
+.ro-banner{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--accent)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;vertical-align:middle}
+.sync-dot.off{background:var(--red)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .25s ease forwards}
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:12px}
+.chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:2px}
+.chart-lbl{font-size:9px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="screen"></div>
 
-  <!-- Bottom Nav -->
+<div id="login-screen">
+  <div class="login-logo">⚽</div>
+  <div class="login-title">TuS Lachendorf</div>
+  <div class="login-sub">Vereinskasse &amp; Strafen</div>
+  <div class="login-card">
+    <label class="login-label">Team-Passwort</label>
+    <input class="login-input" id="pw-input" type="password" placeholder="••••" maxlength="30"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-hint">Alle Mitglieder nutzen dasselbe Teampasswort</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="screen"></div>
   <nav class="nav">
     <button class="nav-item active" onclick="navigate('dashboard')" id="nav-dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -190,933 +142,389 @@ option { background:var(--card); }
       Einstellungen
     </button>
   </nav>
-
-  <!-- FAB -->
-  <button class="fab" id="fab" onclick="openFAB()">
+  <button class="fab" id="fab" onclick="openFAB()" style="display:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal" id="modal-content"></div>
 </div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script>
-// ═══════════════════════════════════════════
-// DATA STORE (localStorage)
-// ═══════════════════════════════════════════
-const DB = {
-  get(key) {
-    try { return JSON.parse(localStorage.getItem(key)) || []; }
-    catch { return []; }
-  },
-  set(key, val) { localStorage.setItem(key, JSON.stringify(val)); },
-  init() {
-    if (!localStorage.getItem('initialized')) {
-      this.set('spieler', [
-        { id:1, name:'Müller',  position:'Stürmer',    nummer:9,  status:'Aktiv',   color:'#3b82f6' },
-        { id:2, name:'Schmidt', position:'Mittelfeld', nummer:8,  status:'Aktiv',   color:'#a855f7' },
-        { id:3, name:'Weber',   position:'Abwehr',     nummer:4,  status:'Aktiv',   color:'#22c55e' },
-        { id:4, name:'Bauer',   position:'Torwart',    nummer:1,  status:'Aktiv',   color:'#f59e0b' },
-        { id:5, name:'Fischer', position:'Stürmer',    nummer:11, status:'Inaktiv', color:'#64748b' },
-      ]);
-      this.set('katalog', [
-        { id:1, name:'Zu spät zum Training',    betrag:5  },
-        { id:2, name:'Falsches Trikot',         betrag:10 },
-        { id:3, name:'Handy in der Kabine',     betrag:15 },
-        { id:4, name:'Unentschuldigtes Fehlen', betrag:20 },
-        { id:5, name:'Rote Karte',              betrag:25 },
-        { id:6, name:'Gelb-Rote Karte',         betrag:15 },
-        { id:7, name:'Unsportliches Verhalten', betrag:30 },
-      ]);
-      this.set('strafen', [
-        { id:1, datum:'2025-01-10', spieler:'Müller',  strafe:'Zu spät zum Training',   betrag:5,  bezahlt:true,  monat:'Jan' },
-        { id:2, datum:'2025-01-15', spieler:'Schmidt', strafe:'Falsches Trikot',         betrag:10, bezahlt:false, monat:'Jan' },
-        { id:3, datum:'2025-02-03', spieler:'Müller',  strafe:'Handy in der Kabine',    betrag:15, bezahlt:true,  monat:'Feb' },
-        { id:4, datum:'2025-02-18', spieler:'Weber',   strafe:'Unentschuldigtes Fehlen',betrag:20, bezahlt:false, monat:'Feb' },
-        { id:5, datum:'2025-03-07', spieler:'Schmidt', strafe:'Rote Karte',             betrag:25, bezahlt:true,  monat:'Mrz' },
-        { id:6, datum:'2025-05-12', spieler:'Weber',   strafe:'Gelb-Rote Karte',        betrag:15, bezahlt:false, monat:'Mai' },
-      ]);
-      this.set('kasse', [
-        { id:1, datum:'2025-01-15', typ:'Einnahme', kategorie:'Mitgliedsbeitrag',   beschreibung:'Januarbeiträge',        betrag:500, monat:'Jan' },
-        { id:2, datum:'2025-01-20', typ:'Ausgabe',  kategorie:'Ausrüstung/Einkauf', beschreibung:'Trainingsbälle',        betrag:120, monat:'Jan' },
-        { id:3, datum:'2025-02-10', typ:'Einnahme', kategorie:'Veranstaltung',      beschreibung:'Hallenturnier',         betrag:300, monat:'Feb' },
-        { id:4, datum:'2025-03-05', typ:'Einnahme', kategorie:'Mitgliedsbeitrag',   beschreibung:'Märzbeiträge',          betrag:450, monat:'Mrz' },
-        { id:5, datum:'2025-04-01', typ:'Einnahme', kategorie:'Sonstiges',          beschreibung:'Sponsorenzahlung',      betrag:600, monat:'Apr' },
-        { id:6, datum:'2025-04-14', typ:'Ausgabe',  kategorie:'Sonstiges',          beschreibung:'Verwaltungskosten',     betrag:150, monat:'Apr' },
-      ]);
-      localStorage.setItem('initialized', '1');
-      localStorage.setItem('ziel', '500');
-      if (!localStorage.getItem('kategorien')) {
-        this.set('kategorien', ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges','Strafen']);
-      }
-    }
-  }
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc,
+         onSnapshot, query, orderBy, getDoc }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// ════════════════════════════════════════════════════
+// KONFIGURATION — hier Passwörter ändern
+// ════════════════════════════════════════════════════
+const TEAM_PW  = "TuS2025";    // Passwort für alle Spieler
+const ADMIN_PW = "Admin2025";  // Nur Kassenwart + Trainer
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzkQwnx2CdNXwQ8n4qd6v6VaQeVRlk4lk",
+  authDomain: "tus-lachendorf.firebaseapp.com",
+  projectId: "tus-lachendorf",
+  storageBucket: "tus-lachendorf.firebasestorage.app",
+  messagingSenderId: "632764470251",
+  appId: "1:632764470251:web:8cd82ebee9d12eb6063fae"
+};
+// ════════════════════════════════════════════════════
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+const S = { isAdmin:false, strafen:[], kasse:[], spieler:[], katalog:[], kategorien:[], ziel:500, online:true };
+
+const fmt = n => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n);
+const fmtD = d => { try{return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}catch{return d}};
+const MO = ['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const getMo = d => MO[new Date(d).getMonth()];
+const ini = n => n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const gcol = name => S.spieler.find(s=>s.name===name)?.color||'#64748b';
+const nid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+function toast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(err?' error':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+
+// ── LOGIN ────────────────────────────────────────────
+window.doLogin = function(){
+  const pw = document.getElementById('pw-input').value.trim();
+  const er = document.getElementById('login-error');
+  if(pw===ADMIN_PW){ S.isAdmin=true; boot(); }
+  else if(pw===TEAM_PW){ S.isAdmin=false; boot(); }
+  else{ er.textContent='❌ Falsches Passwort'; document.getElementById('pw-input').value=''; setTimeout(()=>er.textContent='',3000); }
 };
 
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-const fmt = n => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n);
-const fmtDate = d => new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
-const MONATE = ['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-const getMonat = d => MONATE[new Date(d).getMonth()];
-const getColor = name => { const sp = DB.get('spieler').find(s=>s.name===name); return sp?.color||'#64748b'; };
-const initials = name => name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-let nextId = () => Date.now();
-
-function toast(msg, err=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (err?' error':'');
-  setTimeout(()=>t.className='toast',2500);
+function boot(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  if(S.isAdmin) document.getElementById('fab').style.display='flex';
+  initListeners();
+  navigate('dashboard');
+  window.addEventListener('online', ()=>{S.online=true; toast('🟢 Online')});
+  window.addEventListener('offline',()=>{S.online=false; toast('🔴 Offline',true)});
 }
 
-// ═══════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════
-function checkNotifications() {
-  if (!('Notification' in window)) return;
-  const strafen = DB.get('strafen').filter(s=>!s.bezahlt);
-  if (strafen.length > 0 && Notification.permission === 'granted') {
-    new Notification('⚠️ Offene Strafen', {
-      body: `${strafen.length} Strafe${strafen.length>1?'n':''} noch nicht bezahlt!`,
-      icon: 'icon-192.svg'
-    });
-  }
+// ── FIRESTORE LISTENERS ──────────────────────────────
+function initListeners(){
+  onSnapshot(query(collection(db,'strafen'),orderBy('datum','desc')), s=>{
+    S.strafen=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(['dashboard','strafen'].includes(currentPage)) render();
+  });
+  onSnapshot(query(collection(db,'kasse'),orderBy('datum','desc')), s=>{
+    S.kasse=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(['dashboard','kasse'].includes(currentPage)) render();
+  });
+  onSnapshot(collection(db,'spieler'), s=>{
+    S.spieler=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentPage==='spieler') render();
+  });
+  onSnapshot(doc(db,'config','main'), s=>{
+    if(s.exists()){
+      const d=s.data();
+      S.katalog=d.katalog||defKat(); S.kategorien=d.kategorien||defKatg(); S.ziel=d.ziel||500;
+    } else {
+      setDoc(doc(db,'config','main'),{katalog:defKat(),kategorien:defKatg(),ziel:500});
+    }
+    if(currentPage==='einstellungen') render();
+  });
 }
 
-async function requestNotifications() {
-  if ('Notification' in window && Notification.permission === 'default') {
-    await Notification.requestPermission();
-  }
-}
+function defKat(){ return [{id:'1',name:'Zu spät zum Training',betrag:5},{id:'2',name:'Falsches Trikot',betrag:10},{id:'3',name:'Handy in der Kabine',betrag:15},{id:'4',name:'Unentschuldigtes Fehlen',betrag:20},{id:'5',name:'Rote Karte',betrag:25},{id:'6',name:'Gelb-Rote Karte',betrag:15},{id:'7',name:'Unsportliches Verhalten',betrag:30}]; }
+function defKatg(){ return ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges','Strafen']; }
 
-// ═══════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════
-let currentPage = 'dashboard';
-function navigate(page) {
-  currentPage = page;
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('nav-'+page)?.classList.add('active');
-  document.getElementById('screen').scrollTop = 0;
+// ── NAVIGATION ───────────────────────────────────────
+let currentPage='dashboard';
+window.navigate = function(p){
+  currentPage=p;
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('nav-'+p)?.classList.add('active');
+  document.getElementById('screen').scrollTop=0;
   render();
-}
+};
 
-function render() {
-  const screens = {
-    dashboard:     renderDashboard,
-    strafen:       renderStrafen,
-    kasse:         renderKasse,
-    spieler:       renderSpieler,
-    einstellungen: renderEinstellungen,
-  };
-  const el = document.getElementById('screen');
-  el.innerHTML = '';
-  const content = screens[currentPage]?.() || '';
-  el.innerHTML = content;
+function render(){
+  const map={dashboard:rDash,strafen:rStrafen,kasse:rKasse,spieler:rSpieler,einstellungen:rSettings};
+  const el=document.getElementById('screen');
+  el.innerHTML=map[currentPage]?.() || '';
   el.classList.add('fade-in');
   setTimeout(()=>el.classList.remove('fade-in'),300);
 }
 
-// ═══════════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════════
-function renderDashboard() {
-  const kasse   = DB.get('kasse');
-  const strafen = DB.get('strafen');
-  const ziel    = parseFloat(localStorage.getItem('ziel')||'500');
-
-  const einnahmen = kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
-  const ausgaben  = kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
-  const kassenstand = einnahmen - ausgaben;
-  const strafenGesamt = strafen.reduce((a,b)=>a+b.betrag,0);
-  const strafenOffen  = strafen.filter(s=>!s.bezahlt).reduce((a,b)=>a+b.betrag,0);
-  const progress = Math.min(strafenGesamt/ziel*100,100).toFixed(0);
-
-  // Chart data
-  const monatsData = {};
-  MONATE.forEach(m=>{ monatsData[m]={ein:0,aus:0}; });
-  kasse.forEach(k=>{ if(monatsData[k.monat]) { if(k.typ==='Einnahme') monatsData[k.monat].ein+=k.betrag; else monatsData[k.monat].aus+=k.betrag; } });
-  const monate6 = MONATE.slice(0,6);
-  const maxVal = Math.max(...monate6.map(m=>Math.max(monatsData[m].ein,monatsData[m].aus)),1);
-
-  const chartBars = monate6.map(m=>{
-    const einH = Math.max((monatsData[m].ein/maxVal)*70,2);
-    const ausH = Math.max((monatsData[m].aus/maxVal)*70,2);
-    return `<div class="chart-bar-col">
-      <div style="display:flex;gap:2px;align-items:flex-end;height:74px">
-        <div class="chart-bar" style="width:45%;height:${einH}px;background:var(--green)"></div>
-        <div class="chart-bar" style="width:45%;height:${ausH}px;background:var(--red)"></div>
-      </div>
-      <span class="chart-label">${m}</span>
-    </div>`;
-  }).join('');
-
-  // Recent
-  const recent = [...strafen].sort((a,b)=>new Date(b.datum)-new Date(a.datum)).slice(0,3);
-  const recentHtml = recent.map(s=>`
-    <div class="list-item">
-      <div class="player-avatar" style="background:${getColor(s.spieler)}22;color:${getColor(s.spieler)};font-size:12px">${initials(s.spieler)}</div>
-      <div class="list-body">
-        <div class="list-title">${s.spieler}</div>
-        <div class="list-sub">${s.strafe}</div>
-      </div>
-      <div class="list-right">
-        <div class="list-amount orange">${fmt(s.betrag)}</div>
-        <span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span>
-      </div>
-    </div>`).join('');
-
-  const offeneAnzahl = strafen.filter(s=>!s.bezahlt).length;
-
-  return `
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">⚽ Vereinskasse</div>
-        <div class="topbar-sub">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</div>
-      </div>
-      <div class="avatar" onclick="requestNotifications()">VK</div>
+// ── DASHBOARD ────────────────────────────────────────
+function rDash(){
+  const ein=S.kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
+  const aus=S.kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
+  const stG=S.strafen.reduce((a,b)=>a+b.betrag,0);
+  const stO=S.strafen.filter(s=>!s.bezahlt).reduce((a,b)=>a+b.betrag,0);
+  const oA=S.strafen.filter(s=>!s.bezahlt).length;
+  const prog=Math.min(stG/(S.ziel||500)*100,100).toFixed(0);
+  const mD={};MO.forEach(m=>mD[m]={e:0,a:0});
+  S.kasse.forEach(k=>{if(mD[k.monat]){if(k.typ==='Einnahme')mD[k.monat].e+=k.betrag;else mD[k.monat].a+=k.betrag;}});
+  const m6=MO.slice(0,6); const mx=Math.max(...m6.map(m=>Math.max(mD[m].e,mD[m].a)),1);
+  const bars=m6.map(m=>`<div class="chart-bar-col"><div style="display:flex;gap:2px;align-items:flex-end;height:74px"><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].e/mx*70,2)}px;background:var(--green)"></div><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].a/mx*70,2)}px;background:var(--red)"></div></div><span class="chart-lbl">${m}</span></div>`).join('');
+  const rec=S.strafen.slice(0,3).map(s=>`<div class="list-item"><div class="player-avatar" style="background:${gcol(s.spieler)}22;color:${gcol(s.spieler)};font-size:12px">${ini(s.spieler)}</div><div class="list-body"><div class="list-title">${s.spieler}</div><div class="list-sub">${s.strafe}</div></div><div class="list-right"><div class="list-amount orange">${fmt(s.betrag)}</div><span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span></div></div>`).join('');
+  return `<div class="topbar"><div><div class="topbar-title">⚽ TuS Lachendorf</div><div class="topbar-sub"><span class="sync-dot ${S.online?'':'off'}"></span>${S.online?'Live':'Offline'} · ${new Date().toLocaleDateString('de-DE',{day:'numeric',month:'long'})}</div></div><button class="avatar ${S.isAdmin?'admin':'user'}" onclick="${S.isAdmin?'adminOut()':'tryAdmin()'}">${S.isAdmin?'ADM':'USR'}</button></div>
+  <div style="padding:16px 0 0">
+    ${!S.isAdmin?`<div class="ro-banner">👁 Nur-Lesen · Tippe USR um Admin zu werden</div>`:''}
+    <div class="kpi-grid">
+      <div class="kpi blue"><div class="kpi-label">Kassenstand</div><div class="kpi-value">${fmt(ein-aus)}</div></div>
+      <div class="kpi orange"><div class="kpi-label">Strafen Gesamt</div><div class="kpi-value">${fmt(stG)}</div></div>
+      <div class="kpi green"><div class="kpi-label">Einnahmen</div><div class="kpi-value">${fmt(ein)}</div></div>
+      <div class="kpi red"><div class="kpi-label">Ausgaben</div><div class="kpi-value">${fmt(aus)}</div></div>
     </div>
-
-    <div style="padding:16px 0 0">
-      <div class="kpi-grid">
-        <div class="kpi blue">
-          <div class="kpi-label">Kassenstand</div>
-          <div class="kpi-value">${fmt(kassenstand)}</div>
-        </div>
-        <div class="kpi orange">
-          <div class="kpi-label">Strafen Gesamt</div>
-          <div class="kpi-value">${fmt(strafenGesamt)}</div>
-        </div>
-        <div class="kpi green">
-          <div class="kpi-label">Einnahmen</div>
-          <div class="kpi-value">${fmt(einnahmen)}</div>
-        </div>
-        <div class="kpi red">
-          <div class="kpi-label">Ausgaben</div>
-          <div class="kpi-value">${fmt(ausgaben)}</div>
-        </div>
-      </div>
-
-      ${offeneAnzahl > 0 ? `
-      <div class="card" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3)" onclick="navigate('strafen')">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:20px">⚠️</span>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--red)">${offeneAnzahl} offene Strafe${offeneAnzahl>1?'n':''}</div>
-            <div style="font-size:12px;color:var(--muted)">${fmt(strafenOffen)} noch nicht bezahlt → Tippen zum Anzeigen</div>
-          </div>
-        </div>
-      </div>` : ''}
-
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-size:13px;font-weight:600">Strafenziel-Fortschritt</div>
-          <div style="font-size:12px;color:var(--muted)">${fmt(strafenGesamt)} / ${fmt(ziel)}</div>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${progress}%"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">${progress}% erreicht</div>
-      </div>
-
-      <div class="sec">Einnahmen vs. Ausgaben</div>
-      <div class="card">
-        <div style="display:flex;gap:12px;margin-bottom:8px">
-          <span style="font-size:11px;color:var(--green)">● Einnahmen</span>
-          <span style="font-size:11px;color:var(--red)">● Ausgaben</span>
-        </div>
-        <div class="chart-bar-wrap">${chartBars}</div>
-      </div>
-
-      <div class="sec">Zuletzt eingetragen</div>
-      <div class="card">${recentHtml || '<div class="empty"><div class="empty-text">Keine Strafen vorhanden</div></div>'}</div>
-    </div>`;
+    ${oA>0?`<div class="card" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);cursor:pointer" onclick="navigate('strafen')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">⚠️</span><div><div style="font-size:14px;font-weight:700;color:var(--red)">${oA} offene Strafe${oA>1?'n':''}</div><div style="font-size:12px;color:var(--muted)">${fmt(stO)} nicht bezahlt</div></div></div></div>`:''}
+    <div class="card"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:600">Strafenziel</span><span style="font-size:12px;color:var(--muted)">${fmt(stG)} / ${fmt(S.ziel)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">${prog}% erreicht</div></div>
+    <div class="sec">Einnahmen vs. Ausgaben</div>
+    <div class="card"><div style="display:flex;gap:12px;margin-bottom:8px"><span style="font-size:11px;color:var(--green)">● Einnahmen</span><span style="font-size:11px;color:var(--red)">● Ausgaben</span></div><div class="chart-bar-wrap">${bars}</div></div>
+    <div class="sec">Letzte Strafen</div>
+    <div class="card">${rec||'<div style="text-align:center;padding:20px;color:var(--muted)">Keine Strafen</div>'}</div>
+  </div>`;
 }
 
-// ═══════════════════════════════════════════
-// STRAFEN
-// ═══════════════════════════════════════════
-function renderStrafen() {
-  const strafen = DB.get('strafen').sort((a,b)=>new Date(b.datum)-new Date(a.datum));
-  const offen   = strafen.filter(s=>!s.bezahlt);
-  const bezahlt = strafen.filter(s=>s.bezahlt);
+window.tryAdmin = function(){
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">🔐 Admin-Zugang</div><div style="color:var(--muted);font-size:14px;margin-bottom:16px">Nur Kassenwart &amp; Trainer</div><div class="form-group"><label class="form-label">Admin-Passwort</label><input class="form-input" id="apw" type="password" placeholder="••••" style="text-align:center;letter-spacing:3px;font-size:20px" onkeydown="if(event.key==='Enter')chkAdmin()"></div><button class="btn btn-primary" onclick="chkAdmin()">Bestätigen</button><div id="aerr" style="color:var(--red);font-size:13px;text-align:center;margin-top:8px"></div>`;
+  openModal(); setTimeout(()=>document.getElementById('apw')?.focus(),400);
+};
+window.chkAdmin = function(){
+  if(document.getElementById('apw').value===ADMIN_PW){S.isAdmin=true;document.getElementById('fab').style.display='flex';closeModal();toast('✅ Admin-Modus aktiv');render();}
+  else document.getElementById('aerr').textContent='❌ Falsches Passwort';
+};
+window.adminOut = function(){S.isAdmin=false;document.getElementById('fab').style.display='none';toast('Admin-Modus beendet');render();};
 
-  const renderItem = s => `
-    <div class="list-item" onclick="strafenDetail(${s.id})">
-      <div class="player-avatar" style="background:${getColor(s.spieler)}22;color:${getColor(s.spieler)};font-size:12px">${initials(s.spieler)}</div>
-      <div class="list-body">
-        <div class="list-title">${s.spieler}</div>
-        <div class="list-sub">${s.strafe}</div>
-      </div>
-      <div class="list-right">
-        <div class="list-amount orange">${fmt(s.betrag)}</div>
-        <div class="list-date">${fmtDate(s.datum)}</div>
-      </div>
-    </div>`;
-
-  return `
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Strafen</div>
-        <div class="topbar-sub">${strafen.length} Einträge · ${fmt(offen.reduce((a,b)=>a+b.betrag,0))} offen</div>
-      </div>
-    </div>
-    <div style="padding:16px 0 0">
-      ${offen.length > 0 ? `
-      <div class="sec" style="color:var(--red)">⚠ Offen (${offen.length})</div>
-      <div class="card">${offen.map(renderItem).join('')}</div>` : ''}
-
-      ${bezahlt.length > 0 ? `
-      <div class="sec">✓ Bezahlt (${bezahlt.length})</div>
-      <div class="card">${bezahlt.map(renderItem).join('')}</div>` : ''}
-
-      ${strafen.length === 0 ? '<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">Keine Strafen eingetragen</div></div>' : ''}
-    </div>`;
+// ── STRAFEN ──────────────────────────────────────────
+function rStrafen(){
+  const offen=S.strafen.filter(s=>!s.bezahlt); const bez=S.strafen.filter(s=>s.bezahlt);
+  const ri=s=>`<div class="list-item" onclick="strDetail('${s.id}')"><div class="player-avatar" style="background:${gcol(s.spieler)}22;color:${gcol(s.spieler)};font-size:12px">${ini(s.spieler)}</div><div class="list-body"><div class="list-title">${s.spieler}</div><div class="list-sub">${s.strafe}</div></div><div class="list-right"><div class="list-amount orange">${fmt(s.betrag)}</div><div class="list-date">${fmtD(s.datum)}</div></div></div>`;
+  return `<div class="topbar"><div><div class="topbar-title">Strafen</div><div class="topbar-sub">${S.strafen.length} Einträge · ${fmt(offen.reduce((a,b)=>a+b.betrag,0))} offen</div></div></div>
+  <div style="padding:16px 0 0">
+    ${offen.length?`<div class="sec" style="color:var(--red)">⚠ Offen (${offen.length})</div><div class="card">${offen.map(ri).join('')}</div>`:''}
+    ${bez.length?`<div class="sec">✓ Bezahlt (${bez.length})</div><div class="card">${bez.map(ri).join('')}</div>`:''}
+    ${!S.strafen.length?'<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px">🎉</div>Keine Strafen</div>':''}
+  </div>`;
 }
 
-function strafenDetail(id) {
-  const strafen = DB.get('strafen');
-  const s = strafen.find(x=>x.id===id);
-  if (!s) return;
-  const sp = DB.get('spieler').find(x=>x.name===s.spieler);
-
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
-      <div class="player-avatar" style="width:52px;height:52px;font-size:18px;background:${sp?.color||'#64748b'}22;color:${sp?.color||'#64748b'}">${initials(s.spieler)}</div>
-      <div>
-        <div style="font-size:18px;font-weight:700">${s.spieler}</div>
-        <div style="color:var(--muted);font-size:13px">${s.strafe}</div>
-      </div>
-    </div>
-    <div class="card-sm" style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="color:var(--muted);font-size:13px">Betrag</span>
-        <span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace">${fmt(s.betrag)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="color:var(--muted);font-size:13px">Datum</span>
-        <span style="font-size:13px">${fmtDate(s.datum)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between">
-        <span style="color:var(--muted);font-size:13px">Status</span>
-        <span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span>
-      </div>
-    </div>
-    ${!s.bezahlt ? `
-    <button class="btn btn-green" onclick="strafeBezahlen(${s.id})">✓ Als bezahlt markieren</button>
-    <div style="height:8px"></div>` : ''}
-    <button class="btn btn-ghost" style="color:var(--red)" onclick="strafeLoeschen(${s.id})">🗑 Strafe löschen</button>`;
+window.strDetail = function(id){
+  const s=S.strafen.find(x=>x.id===id); if(!s) return;
+  const sp=S.spieler.find(x=>x.name===s.spieler);
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div class="player-avatar" style="width:52px;height:52px;font-size:18px;background:${sp?.color||'#64748b'}22;color:${sp?.color||'#64748b'}">${ini(s.spieler)}</div><div><div style="font-size:18px;font-weight:700">${s.spieler}</div><div style="color:var(--muted);font-size:13px">${s.strafe}</div></div></div>
+  <div class="card-sm" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Betrag</span><span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace">${fmt(s.betrag)}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Datum</span><span style="font-size:13px">${fmtD(s.datum)}</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Status</span><span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span></div>
+  </div>
+  ${S.isAdmin&&!s.bezahlt?`<button class="btn btn-green" style="margin-bottom:8px" onclick="strBez('${id}')">✓ Als bezahlt markieren</button>`:''}
+  ${S.isAdmin?`<button class="btn btn-ghost" style="color:var(--red)" onclick="strDel('${id}')">🗑 Löschen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center;margin-top:8px">Nur Admin kann Änderungen vornehmen</div>'}`;
   openModal();
+};
+window.strBez = async function(id){
+  const s=S.strafen.find(x=>x.id===id); if(!s) return;
+  await setDoc(doc(db,'strafen',id),{...s,bezahlt:true});
+  await addDoc(collection(db,'kasse'),{datum:new Date().toISOString().split('T')[0],typ:'Einnahme',kategorie:'Strafen',beschreibung:`Strafe: ${s.spieler} — ${s.strafe}`,betrag:s.betrag,monat:getMo(new Date())});
+  closeModal(); toast(`✅ ${fmt(s.betrag)} von ${s.spieler} gebucht!`);
+};
+window.strDel = async function(id){
+  if(!confirm('Strafe löschen?')) return;
+  await deleteDoc(doc(db,'strafen',id)); closeModal(); toast('Gelöscht');
+};
+
+// ── KASSE ────────────────────────────────────────────
+function rKasse(){
+  const ein=S.kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
+  const aus=S.kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
+  const ri=k=>`<div class="list-item" onclick="kasDetail('${k.id}')"><div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="font-size:18px">${k.typ==='Einnahme'?'↑':'↓'}</div><div class="list-body"><div class="list-title">${k.beschreibung}</div><div class="list-sub">${k.kategorie} · ${k.monat}</div></div><div class="list-right"><div class="list-amount ${k.typ==='Einnahme'?'green':'red'}">${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}</div><div class="list-date">${fmtD(k.datum)}</div></div></div>`;
+  return `<div class="topbar"><div><div class="topbar-title">Kasse</div><div class="topbar-sub">Stand: ${fmt(ein-aus)}</div></div></div>
+  <div style="padding:16px 0 0">
+    <div class="kpi-grid"><div class="kpi green"><div class="kpi-label">Einnahmen</div><div class="kpi-value">${fmt(ein)}</div></div><div class="kpi red"><div class="kpi-label">Ausgaben</div><div class="kpi-value">${fmt(aus)}</div></div></div>
+    <div class="sec">Alle Buchungen</div>
+    <div class="card">${S.kasse.map(ri).join('')||'<div style="text-align:center;padding:20px;color:var(--muted)">Keine Buchungen</div>'}</div>
+  </div>`;
 }
+window.kasDetail = function(id){
+  const k=S.kasse.find(x=>x.id===id); if(!k) return;
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px"><div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="width:48px;height:48px;font-size:22px;border-radius:12px">${k.typ==='Einnahme'?'↑':'↓'}</div><div><div style="font-size:18px;font-weight:700">${k.beschreibung}</div><div style="color:var(--muted);font-size:13px">${k.kategorie}</div></div></div>
+  <div class="card-sm" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Typ</span><span class="badge ${k.typ==='Einnahme'?'green':'red'}">${k.typ}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Betrag</span><span style="font-weight:700;font-family:'DM Mono',monospace;color:${k.typ==='Einnahme'?'var(--green)':'var(--red)'}"> ${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Datum</span><span style="font-size:13px">${fmtD(k.datum)}</span></div>
+  </div>
+  ${S.isAdmin?`<button class="btn btn-ghost" style="color:var(--red)" onclick="kasDel('${id}')">🗑 Buchung löschen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center">Nur Admin kann löschen</div>'}`;
+  openModal();
+};
+window.kasDel = async function(id){
+  if(!confirm('Buchung löschen?')) return;
+  await deleteDoc(doc(db,'kasse',id)); closeModal(); toast('Buchung gelöscht');
+};
 
-function strafeBezahlen(id) {
-  const strafen = DB.get('strafen');
-  const s = strafen.find(x=>x.id===id);
-  if (!s) return;
-  s.bezahlt = true;
-  DB.set('strafen', strafen);
-
-  // Auto in Kasse buchen
-  const kasse = DB.get('kasse');
-  kasse.push({
-    id: nextId(),
-    datum: new Date().toISOString().split('T')[0],
-    typ: 'Einnahme',
-    kategorie: 'Strafen',
-    beschreibung: `Strafe: ${s.spieler} — ${s.strafe}`,
-    betrag: s.betrag,
-    monat: getMonat(new Date())
-  });
-  DB.set('kasse', kasse);
-
-  closeModal();
-  toast(`✅ ${fmt(s.betrag)} von ${s.spieler} als bezahlt markiert & gebucht!`);
-  render();
-}
-
-function strafeLoeschen(id) {
-  if (!confirm('Strafe wirklich löschen?')) return;
-  DB.set('strafen', DB.get('strafen').filter(s=>s.id!==id));
-  closeModal();
-  toast('Strafe gelöscht');
-  render();
-}
-
-// ═══════════════════════════════════════════
-// KASSE
-// ═══════════════════════════════════════════
-function renderKasse() {
-  const kasse = DB.get('kasse').sort((a,b)=>new Date(b.datum)-new Date(a.datum));
-  const einnahmen = kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
-  const ausgaben  = kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
-
-  const renderItem = k => `
-    <div class="list-item" onclick="kasseDetail(${k.id})">
-      <div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="font-size:18px">
-        ${k.typ==='Einnahme'?'↑':'↓'}
-      </div>
-      <div class="list-body">
-        <div class="list-title">${k.beschreibung}</div>
-        <div class="list-sub">${k.kategorie} · ${k.monat}</div>
-      </div>
-      <div class="list-right">
-        <div class="list-amount ${k.typ==='Einnahme'?'green':'red'}">${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}</div>
-        <div class="list-date">${fmtDate(k.datum)}</div>
-      </div>
-    </div>`;
-
-  return `
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Kasse</div>
-        <div class="topbar-sub">Stand: ${fmt(einnahmen-ausgaben)}</div>
-      </div>
-    </div>
-    <div style="padding:16px 0 0">
-      <div class="kpi-grid">
-        <div class="kpi green">
-          <div class="kpi-label">Einnahmen</div>
-          <div class="kpi-value">${fmt(einnahmen)}</div>
-        </div>
-        <div class="kpi red">
-          <div class="kpi-label">Ausgaben</div>
-          <div class="kpi-value">${fmt(ausgaben)}</div>
-        </div>
-      </div>
-      <div class="sec">Alle Buchungen</div>
-      <div class="card">
-        ${kasse.map(renderItem).join('') || '<div class="empty"><div class="empty-text">Keine Buchungen</div></div>'}
-      </div>
-    </div>`;
-}
-
-// ═══════════════════════════════════════════
-// SPIELER
-// ═══════════════════════════════════════════
-function renderSpieler() {
-  const spieler = DB.get('spieler');
-  const strafen = DB.get('strafen');
-
-  const renderItem = sp => {
-    const spStrafen = strafen.filter(s=>s.spieler===sp.name);
-    const gesamt = spStrafen.reduce((a,b)=>a+b.betrag,0);
-    const offen  = spStrafen.filter(s=>!s.bezahlt).reduce((a,b)=>a+b.betrag,0);
-    return `
-      <div class="list-item" onclick="spielerDetail(${sp.id})">
-        <div class="player-avatar" style="background:${sp.color}22;color:${sp.color}">${initials(sp.name)}</div>
-        <div class="list-body">
-          <div class="list-title">${sp.name} <span style="color:var(--muted);font-size:12px">#${sp.nummer}</span></div>
-          <div class="list-sub">${sp.position} · <span class="badge ${sp.status==='Aktiv'?'green':'orange'}" style="font-size:9px">${sp.status}</span></div>
-        </div>
-        <div class="list-right">
-          <div class="list-amount orange">${fmt(gesamt)}</div>
-          ${offen>0?`<div style="font-size:11px;color:var(--red)">${fmt(offen)} offen</div>`:'<div style="font-size:11px;color:var(--green)">✓ alles bezahlt</div>'}
-        </div>
-      </div>`;
+// ── SPIELER ──────────────────────────────────────────
+function rSpieler(){
+  const ri=sp=>{
+    const ss=S.strafen.filter(s=>s.spieler===sp.name);
+    const g=ss.reduce((a,b)=>a+b.betrag,0); const o=ss.filter(s=>!s.bezahlt).reduce((a,b)=>a+b.betrag,0);
+    return `<div class="list-item" onclick="spDetail('${sp.id}')"><div class="player-avatar" style="background:${sp.color}22;color:${sp.color}">${ini(sp.name)}</div><div class="list-body"><div class="list-title">${sp.name} <span style="color:var(--muted);font-size:12px">#${sp.nummer}</span></div><div class="list-sub">${sp.position} · <span class="badge ${sp.status==='Aktiv'?'green':'orange'}" style="font-size:9px">${sp.status}</span></div></div><div class="list-right"><div class="list-amount orange">${fmt(g)}</div>${o>0?`<div style="font-size:11px;color:var(--red)">${fmt(o)} offen</div>`:`<div style="font-size:11px;color:var(--green)">✓ bezahlt</div>`}</div></div>`;
   };
-
-  return `
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Spieler</div>
-        <div class="topbar-sub">${spieler.filter(s=>s.status==='Aktiv').length} aktiv · ${spieler.length} gesamt</div>
-      </div>
-    </div>
-    <div style="padding:16px 0 0">
-      <div class="sec">Kader</div>
-      <div class="card">
-        ${spieler.map(renderItem).join('') || '<div class="empty"><div class="empty-text">Keine Spieler</div></div>'}
-      </div>
-    </div>`;
+  return `<div class="topbar"><div><div class="topbar-title">Spieler</div><div class="topbar-sub">${S.spieler.filter(s=>s.status==='Aktiv').length} aktiv · ${S.spieler.length} gesamt</div></div></div>
+  <div style="padding:16px 0 0"><div class="sec">Kader</div><div class="card">${S.spieler.map(ri).join('')||'<div style="text-align:center;padding:20px;color:var(--muted)">Keine Spieler</div>'}</div></div>`;
 }
-
-function spielerDetail(id) {
-  const spieler = DB.get('spieler');
-  const sp = spieler.find(x=>x.id===id);
-  if (!sp) return;
-  const strafen = DB.get('strafen').filter(s=>s.spieler===sp.name);
-  const gesamt  = strafen.reduce((a,b)=>a+b.betrag,0);
-  const bezahlt = strafen.filter(s=>s.bezahlt).reduce((a,b)=>a+b.betrag,0);
-  const offen   = gesamt - bezahlt;
-
-  const COLORS = ['#3b82f6','#a855f7','#22c55e','#f59e0b','#ef4444','#06b6d4','#f97316'];
-
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
-      <div class="player-avatar" style="width:56px;height:56px;font-size:20px;background:${sp.color}22;color:${sp.color}">${initials(sp.name)}</div>
-      <div>
-        <div style="font-size:20px;font-weight:700">${sp.name}</div>
-        <div style="color:var(--muted);font-size:13px">${sp.position} · Trikot #${sp.nummer}</div>
-      </div>
-    </div>
-    <div class="card-sm" style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="color:var(--muted);font-size:13px">Strafen gesamt</span>
-        <span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace">${fmt(gesamt)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="color:var(--muted);font-size:13px">Bezahlt</span>
-        <span style="color:var(--green);font-family:'DM Mono',monospace">${fmt(bezahlt)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between">
-        <span style="color:var(--muted);font-size:13px">Offen</span>
-        <span style="color:${offen>0?'var(--red)':'var(--green)'};font-family:'DM Mono',monospace">${fmt(offen)}</span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Farbe</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${COLORS.map(c=>`<div onclick="spielerFarbe(${id},'${c}')" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===sp.color?'white':'transparent'}"></div>`).join('')}
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Status</label>
-      <select class="form-input form-select" onchange="spielerStatus(${id},this.value)">
-        <option ${sp.status==='Aktiv'?'selected':''}>Aktiv</option>
-        <option ${sp.status==='Inaktiv'?'selected':''}>Inaktiv</option>
-      </select>
-    </div>
-    <button class="btn btn-ghost" style="color:var(--red)" onclick="spielerLoeschen(${id})">🗑 Spieler entfernen</button>`;
+window.spDetail = function(id){
+  const sp=S.spieler.find(x=>x.id===id); if(!sp) return;
+  const ss=S.strafen.filter(s=>s.spieler===sp.name);
+  const g=ss.reduce((a,b)=>a+b.betrag,0); const bz=ss.filter(s=>s.bezahlt).reduce((a,b)=>a+b.betrag,0);
+  const COLS=['#3b82f6','#a855f7','#22c55e','#f59e0b','#ef4444','#06b6d4','#f97316'];
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div class="player-avatar" style="width:56px;height:56px;font-size:20px;background:${sp.color}22;color:${sp.color}">${ini(sp.name)}</div><div><div style="font-size:20px;font-weight:700">${sp.name}</div><div style="color:var(--muted);font-size:13px">${sp.position} · #${sp.nummer}</div></div></div>
+  <div class="card-sm" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Strafen gesamt</span><span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace">${fmt(g)}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Bezahlt</span><span style="color:var(--green);font-family:'DM Mono',monospace">${fmt(bz)}</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Offen</span><span style="color:${g-bz>0?'var(--red)':'var(--green)'};font-family:'DM Mono',monospace">${fmt(g-bz)}</span></div>
+  </div>
+  ${S.isAdmin?`
+  <div class="form-group"><label class="form-label">Farbe</label><div style="display:flex;gap:8px;flex-wrap:wrap">${COLS.map(c=>`<div onclick="spCol('${id}','${c}')" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===sp.color?'#fff':'transparent'}"></div>`).join('')}</div></div>
+  <div class="form-group"><label class="form-label">Status</label><select class="form-input form-select" onchange="spStat('${id}',this.value)"><option ${sp.status==='Aktiv'?'selected':''}>Aktiv</option><option ${sp.status==='Inaktiv'?'selected':''}>Inaktiv</option></select></div>
+  <button class="btn btn-ghost" style="color:var(--red)" onclick="spDel('${id}')">🗑 Spieler entfernen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center">Nur Admin kann Spieler bearbeiten</div>'}`;
   openModal();
-}
+};
+window.spCol = async function(id,c){const sp=S.spieler.find(x=>x.id===id);if(sp)await setDoc(doc(db,'spieler',id),{...sp,color:c});spDetail(id);};
+window.spStat = async function(id,st){const sp=S.spieler.find(x=>x.id===id);if(sp){await setDoc(doc(db,'spieler',id),{...sp,status:st});toast('Status aktualisiert');render();}};
+window.spDel = async function(id){if(!confirm('Spieler löschen?'))return;await deleteDoc(doc(db,'spieler',id));closeModal();toast('Spieler entfernt');};
 
-function spielerFarbe(id, color) {
-  const spieler = DB.get('spieler');
-  const sp = spieler.find(x=>x.id===id);
-  if (sp) { sp.color = color; DB.set('spieler', spieler); }
-  spielerDetail(id);
+// ── EINSTELLUNGEN ────────────────────────────────────
+function rSettings(){
+  const kr=S.katalog.map(k=>`<div class="list-item"><div class="list-body"><div class="list-title">${k.name}</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace;font-size:13px">${fmt(k.betrag)}</span>${S.isAdmin?`<button onclick="editKat('${k.id}')" style="background:rgba(59,130,246,.15);color:var(--accent);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">✏️</button><button onclick="delKat('${k.id}')" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">🗑</button>`:''}</div></div>`).join('');
+  const kg=S.kategorien.map((k,i)=>`<div class="list-item"><div class="list-body"><div class="list-title">${k}</div></div>${S.isAdmin?`<button onclick="delKg(${i})" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">🗑</button>`:''}</div>`).join('');
+  return `<div class="topbar"><div><div class="topbar-title">Einstellungen</div><div class="topbar-sub">${S.isAdmin?'🔓 Admin':'🔒 Nur-Lesen'}</div></div></div>
+  <div style="padding:16px 0 0">
+    ${S.isAdmin?`<div class="sec">Strafenziel</div><div class="card"><div style="display:flex;gap:10px;align-items:center"><input class="form-input" id="ziel-i" type="number" value="${S.ziel}" style="flex:1"><button class="btn btn-primary" style="width:auto;padding:12px 18px" onclick="saveZiel()">Speichern</button></div></div>`:''}
+    <div class="sec">Strafenkatalog</div>
+    <div class="card">${kr||'<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Leer</div>'}
+    ${S.isAdmin?`<div style="margin-top:12px;display:flex;gap:8px"><input class="form-input" id="nkn" type="text" placeholder="Strafe…" style="flex:1"><input class="form-input" id="nkb" type="number" placeholder="€" style="width:75px"><button onclick="addKat()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer">+</button></div>`:''}</div>
+    <div class="sec">Buchungskategorien</div>
+    <div class="card">${kg}${S.isAdmin?`<div style="margin-top:12px;display:flex;gap:8px"><input class="form-input" id="nkg" type="text" placeholder="Neue Kategorie…" style="flex:1"><button onclick="addKg()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer">+</button></div>`:''}</div>
+    ${S.isAdmin?`<div class="sec">Passwörter (aktuell)</div><div class="card"><div class="card-sm" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">Team: ${TEAM_PW}<br>Admin: ${ADMIN_PW}</div><div style="color:var(--muted);font-size:12px;margin-top:10px">Zum Ändern: in index.html TEAM_PW und ADMIN_PW anpassen</div></div>`:''}
+  </div>`;
 }
-
-function spielerStatus(id, status) {
-  const spieler = DB.get('spieler');
-  const sp = spieler.find(x=>x.id===id);
-  if (sp) { sp.status = status; DB.set('spieler', spieler); toast('Status aktualisiert'); render(); }
-}
-
-function spielerLoeschen(id) {
-  if (!confirm('Spieler wirklich löschen?')) return;
-  DB.set('spieler', DB.get('spieler').filter(s=>s.id!==id));
-  closeModal();
-  toast('Spieler entfernt');
-  render();
-}
-
-// ═══════════════════════════════════════════
-// KASSE DETAIL & LÖSCHEN
-// ═══════════════════════════════════════════
-function kasseDetail(id) {
-  const kasse = DB.get('kasse');
-  const k = kasse.find(x=>x.id===id);
-  if (!k) return;
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="width:48px;height:48px;font-size:22px;border-radius:12px">${k.typ==='Einnahme'?'↑':'↓'}</div>
-      <div>
-        <div style="font-size:18px;font-weight:700">${k.beschreibung}</div>
-        <div style="color:var(--muted);font-size:13px">${k.kategorie}</div>
-      </div>
-    </div>
-    <div class="card-sm" style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="color:var(--muted);font-size:13px">Typ</span>
-        <span class="badge ${k.typ==='Einnahme'?'green':'red'}">${k.typ}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <span style="color:var(--muted);font-size:13px">Betrag</span>
-        <span style="font-weight:700;font-family:'DM Mono',monospace;color:${k.typ==='Einnahme'?'var(--green)':'var(--red)'}">
-          ${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}
-        </span>
-      </div>
-      <div style="display:flex;justify-content:space-between">
-        <span style="color:var(--muted);font-size:13px">Datum</span>
-        <span style="font-size:13px">${fmtDate(k.datum)}</span>
-      </div>
-    </div>
-    <button class="btn btn-ghost" style="color:var(--red)" onclick="kasseLoeschen(${id})">🗑 Buchung löschen</button>`;
+window.saveZiel = async function(){
+  const v=parseFloat(document.getElementById('ziel-i').value);
+  if(isNaN(v)||v<=0){toast('Ungültig',true);return;}
+  const s=await getDoc(doc(db,'config','main'));
+  await setDoc(doc(db,'config','main'),{...s.data(),ziel:v});
+  toast('✅ Ziel: '+fmt(v));
+};
+window.addKat = async function(){
+  const n=document.getElementById('nkn').value.trim(); const b=parseFloat(document.getElementById('nkb').value);
+  if(!n||isNaN(b)){toast('Felder ausfüllen',true);return;}
+  const s=await getDoc(doc(db,'config','main'));
+  await setDoc(doc(db,'config','main'),{...s.data(),katalog:[...(s.data()?.katalog||[]),{id:nid(),name:n,betrag:b}]});
+  toast('✅ Hinzugefügt');
+};
+window.editKat = async function(id){
+  const k=S.katalog.find(x=>x.id===id); if(!k) return;
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Strafe bearbeiten</div><div class="form-group"><label class="form-label">Name</label><input class="form-input" id="ek-n" type="text" value="${k.name}"></div><div class="form-group"><label class="form-label">Betrag (€)</label><input class="form-input" id="ek-b" type="number" step="0.01" value="${k.betrag}"></div><button class="btn btn-primary" onclick="saveKat('${id}')">Speichern</button><div style="height:8px"></div><button class="btn btn-ghost" style="color:var(--red)" onclick="delKat('${id}')">🗑 Löschen</button>`;
   openModal();
-}
+};
+window.saveKat = async function(id){
+  const n=document.getElementById('ek-n').value.trim(); const b=parseFloat(document.getElementById('ek-b').value);
+  if(!n||isNaN(b)){toast('Felder ausfüllen',true);return;}
+  const s=await getDoc(doc(db,'config','main'));
+  await setDoc(doc(db,'config','main'),{...s.data(),katalog:s.data()?.katalog?.map(k=>k.id===id?{...k,name:n,betrag:b}:k)||[]});
+  closeModal(); toast('✅ Gespeichert');
+};
+window.delKat = async function(id){
+  if(!confirm('Löschen?')) return;
+  const s=await getDoc(doc(db,'config','main'));
+  await setDoc(doc(db,'config','main'),{...s.data(),katalog:s.data()?.katalog?.filter(k=>k.id!==id)||[]});
+  closeModal(); toast('Gelöscht');
+};
+window.addKg = async function(){
+  const v=document.getElementById('nkg').value.trim(); if(!v){toast('Name eingeben',true);return;}
+  const s=await getDoc(doc(db,'config','main')); const kg=[...(s.data()?.kategorien||[])];
+  if(kg.includes(v)){toast('Existiert bereits',true);return;}
+  kg.push(v); await setDoc(doc(db,'config','main'),{...s.data(),kategorien:kg}); toast('✅ Hinzugefügt');
+};
+window.delKg = async function(i){
+  const s=await getDoc(doc(db,'config','main')); const kg=[...(s.data()?.kategorien||[])];
+  if(kg.length<=1){toast('Mindestens eine nötig',true);return;}
+  kg.splice(i,1); await setDoc(doc(db,'config','main'),{...s.data(),kategorien:kg}); toast('Entfernt');
+};
 
-function kasseLoeschen(id) {
-  if (!confirm('Buchung wirklich löschen?')) return;
-  DB.set('kasse', DB.get('kasse').filter(k=>k.id!==id));
-  closeModal();
-  toast('Buchung gelöscht');
-  render();
-}
-
-// ═══════════════════════════════════════════
-// EINSTELLUNGEN
-// ═══════════════════════════════════════════
-function renderEinstellungen() {
-  const katalog   = DB.get('katalog');
-  const kategorien = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
-  const ziel = localStorage.getItem('ziel') || '500';
-
-  const katRows = katalog.map(k=>`
-    <div class="list-item">
-      <div class="list-body">
-        <div class="list-title">${k.name}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace;font-size:13px">${fmt(k.betrag)}</span>
-        <button onclick="editKatalogItem(${k.id})" style="background:rgba(59,130,246,.15);color:var(--accent);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer">✏️</button>
-        <button onclick="deleteKatalogItem(${k.id})" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer">🗑</button>
-      </div>
-    </div>`).join('');
-
-  const katRows2 = kategorien.map((k,i)=>`
-    <div class="list-item">
-      <div class="list-body"><div class="list-title">${k}</div></div>
-      <button onclick="deleteKategorie(${i})" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer">🗑</button>
-    </div>`).join('');
-
-  return `
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">Einstellungen</div>
-        <div class="topbar-sub">Katalog, Kategorien & Ziel</div>
-      </div>
-    </div>
-    <div style="padding:16px 0 0">
-
-      <div class="sec">Strafenziel</div>
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:10px">
-          <input class="form-input" id="ziel-input" type="number" value="${ziel}" style="flex:1" placeholder="500">
-          <button class="btn btn-primary" style="width:auto;padding:12px 18px" onclick="saveZiel()">Speichern</button>
-        </div>
-      </div>
-
-      <div class="sec">Strafenkatalog</div>
-      <div class="card">
-        ${katRows || '<div class="empty"><div class="empty-text">Keine Einträge</div></div>'}
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <input class="form-input" id="new-kat-name" type="text" placeholder="Strafe (z.B. Zu spät)" style="flex:1">
-          <input class="form-input" id="new-kat-betrag" type="number" placeholder="€" style="width:80px">
-          <button onclick="addKatalogItem()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer;font-weight:700;flex-shrink:0">+</button>
-        </div>
-      </div>
-
-      <div class="sec">Buchungskategorien</div>
-      <div class="card">
-        ${katRows2 || '<div class="empty"><div class="empty-text">Keine Kategorien</div></div>'}
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <input class="form-input" id="new-kategorie" type="text" placeholder="Neue Kategorie…" style="flex:1">
-          <button onclick="addKategorie()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer;font-weight:700;flex-shrink:0">+</button>
-        </div>
-      </div>
-
-      <div class="sec">Daten</div>
-      <div class="card">
-        <button class="btn btn-ghost" style="color:var(--red)" onclick="allesDaten()">⚠️ Alle Daten zurücksetzen</button>
-      </div>
-    </div>`;
-}
-
-function saveZiel() {
-  const val = parseFloat(document.getElementById('ziel-input').value);
-  if (isNaN(val)||val<=0) { toast('Ungültiger Betrag',true); return; }
-  localStorage.setItem('ziel', val);
-  toast('✅ Ziel gespeichert: '+fmt(val));
-  render();
-}
-
-function addKatalogItem() {
-  const name   = document.getElementById('new-kat-name').value.trim();
-  const betrag = parseFloat(document.getElementById('new-kat-betrag').value);
-  if (!name || isNaN(betrag)) { toast('Name und Betrag ausfüllen',true); return; }
-  const katalog = DB.get('katalog');
-  katalog.push({ id:nextId(), name, betrag });
-  DB.set('katalog', katalog);
-  toast('✅ Strafe hinzugefügt');
-  render();
-}
-
-function editKatalogItem(id) {
-  const katalog = DB.get('katalog');
-  const k = katalog.find(x=>x.id===id);
-  if (!k) return;
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">Strafe bearbeiten</div>
-    <div class="form-group">
-      <label class="form-label">Name</label>
-      <input class="form-input" id="ek-name" type="text" value="${k.name}">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Betrag (€)</label>
-      <input class="form-input" id="ek-betrag" type="number" step="0.01" value="${k.betrag}">
-    </div>
-    <button class="btn btn-primary" onclick="saveKatalogItem(${id})">Speichern</button>
-    <div style="height:8px"></div>
-    <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteKatalogItem(${id})">🗑 Löschen</button>`;
+// ── FAB ──────────────────────────────────────────────
+window.openFAB = function(){
+  if(!S.isAdmin){toast('Nur Admin',true);return;}
+  const acts={dashboard:[{l:'➕ Neue Strafe',f:'showStr()'},{l:'➕ Neue Buchung',f:'showBuch()'},{l:'➕ Neuer Spieler',f:'showSp()'}],strafen:[{l:'➕ Neue Strafe',f:'showStr()'}],kasse:[{l:'➕ Neue Buchung',f:'showBuch()'}],spieler:[{l:'➕ Neuer Spieler',f:'showSp()'}],einstellungen:[{l:'➕ Strafenkatalog',f:'navigate("einstellungen")'},{l:'➕ Neue Kategorie',f:'navigate("einstellungen")'}]};
+  const a=acts[currentPage]||acts.dashboard;
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neu erstellen</div>${a.map(x=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${x.f};closeModal()">${x.l}</button>`).join('')}`;
   openModal();
-}
+};
 
-function saveKatalogItem(id) {
-  const name   = document.getElementById('ek-name').value.trim();
-  const betrag = parseFloat(document.getElementById('ek-betrag').value);
-  if (!name || isNaN(betrag)) { toast('Felder ausfüllen',true); return; }
-  const katalog = DB.get('katalog');
-  const k = katalog.find(x=>x.id===id);
-  if (k) { k.name=name; k.betrag=betrag; DB.set('katalog',katalog); }
-  closeModal();
-  toast('✅ Gespeichert');
-  render();
-}
+window.showStr = function(){
+  const spl=S.spieler.filter(s=>s.status==='Aktiv');
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neue Strafe</div>
+  <div class="form-group"><label class="form-label">Spieler</label><select class="form-input form-select" id="fs"><option value="">Spieler wählen…</option>${spl.map(s=>`<option>${s.name}</option>`).join('')}</select></div>
+  <div class="form-group"><label class="form-label">Strafe</label><select class="form-input form-select" id="fst" onchange="upB()"><option value="">Strafe wählen…</option>${S.katalog.map(k=>`<option data-b="${k.betrag}">${k.name} (${fmt(k.betrag)})</option>`).join('')}</select></div>
+  <div class="form-group"><label class="form-label">Betrag (€)</label><input class="form-input" id="fb" type="number" step="0.01" placeholder="0.00"></div>
+  <div class="form-group"><label class="form-label">Datum</label><input class="form-input" id="fd" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+  <button class="btn btn-orange" onclick="savStr()">Strafe speichern</button>`;
+};
+window.upB = function(){const s=document.getElementById('fst');const o=s.options[s.selectedIndex];const b=o.getAttribute('data-b');if(b)document.getElementById('fb').value=b;};
+window.savStr = async function(){
+  const sp=document.getElementById('fs').value;
+  const sel=document.getElementById('fst'); const st=sel.options[sel.selectedIndex]?.text?.replace(/ \(.*\)$/,'');
+  const b=parseFloat(document.getElementById('fb').value); const d=document.getElementById('fd').value;
+  if(!sp||!st||st===''||isNaN(b)||!d){toast('Alle Felder ausfüllen',true);return;}
+  await addDoc(collection(db,'strafen'),{datum:d,spieler:sp,strafe:st,betrag:b,bezahlt:false,monat:getMo(d)});
+  closeModal(); toast(`✅ Strafe für ${sp} eingetragen!`);
+};
 
-function deleteKatalogItem(id) {
-  if (!confirm('Strafe aus dem Katalog löschen?')) return;
-  DB.set('katalog', DB.get('katalog').filter(k=>k.id!==id));
-  closeModal();
-  toast('Gelöscht');
-  render();
-}
+window.showBuch = function(){
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neue Buchung</div>
+  <div class="switch-row" id="tsw"><div class="switch-opt active" onclick="setT('Einnahme',this)">↑ Einnahme</div><div class="switch-opt" onclick="setT('Ausgabe',this)">↓ Ausgabe</div></div>
+  <input type="hidden" id="ft" value="Einnahme">
+  <div class="form-group"><label class="form-label">Kategorie</label><select class="form-input form-select" id="fk">${S.kategorien.map(k=>`<option>${k}</option>`).join('')}</select></div>
+  <div class="form-group"><label class="form-label">Beschreibung</label><input class="form-input" id="fdesc" type="text" placeholder="z.B. Trainingsbälle…"></div>
+  <div class="form-group"><label class="form-label">Betrag (€)</label><input class="form-input" id="fbb" type="number" step="0.01" placeholder="0.00"></div>
+  <div class="form-group"><label class="form-label">Datum</label><input class="form-input" id="fdd" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+  <button class="btn btn-primary" onclick="savBuch()">Buchung speichern</button>`;
+};
+window.setT = function(t,el){document.getElementById('ft').value=t;document.querySelectorAll('#tsw .switch-opt').forEach(e=>e.classList.remove('active'));el.classList.add('active');};
+window.savBuch = async function(){
+  const t=document.getElementById('ft').value; const k=document.getElementById('fk').value;
+  const ds=document.getElementById('fdesc').value; const b=parseFloat(document.getElementById('fbb').value); const d=document.getElementById('fdd').value;
+  if(!ds||isNaN(b)||!d){toast('Alle Felder ausfüllen',true);return;}
+  await addDoc(collection(db,'kasse'),{datum:d,typ:t,kategorie:k,beschreibung:ds,betrag:b,monat:getMo(d)});
+  closeModal(); toast(`✅ ${t} von ${fmt(b)} gespeichert!`);
+};
 
-function addKategorie() {
-  const val = document.getElementById('new-kategorie').value.trim();
-  if (!val) { toast('Name eingeben',true); return; }
-  const kat = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
-  if (kat.includes(val)) { toast('Kategorie existiert bereits',true); return; }
-  kat.push(val);
-  DB.set('kategorien', kat);
-  toast('✅ Kategorie hinzugefügt');
-  render();
-}
+window.showSp = function(){
+  const vg=S.spieler.map(s=>s.nummer).join(', ');
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neuer Spieler</div>
+  <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fn" type="text" placeholder="Vorname Nachname"></div>
+  <div class="form-group"><label class="form-label">Position</label><select class="form-input form-select" id="fp"><option>Torwart</option><option>Abwehr</option><option>Mittelfeld</option><option>Stürmer</option></select></div>
+  <div class="form-group"><label class="form-label">Trikotnummer${vg?' (vergeben: '+vg+')':''}</label><input class="form-input" id="fnr" type="number" min="1" max="99" placeholder="z.B. 10"></div>
+  <button class="btn btn-primary" onclick="savSp()">Spieler hinzufügen</button>`;
+};
+window.savSp = async function(){
+  const n=document.getElementById('fn').value.trim(); const p=document.getElementById('fp').value; const nr=parseInt(document.getElementById('fnr').value);
+  if(!n||isNaN(nr)){toast('Felder ausfüllen',true);return;}
+  if(S.spieler.find(s=>s.nummer===nr)){toast('Nummer vergeben!',true);return;}
+  const COLS=['#3b82f6','#a855f7','#22c55e','#f59e0b','#ef4444','#06b6d4','#f97316'];
+  await addDoc(collection(db,'spieler'),{name:n,position:p,nummer:nr,status:'Aktiv',color:COLS[S.spieler.length%COLS.length]});
+  closeModal(); toast(`✅ ${n} (#${nr}) hinzugefügt!`);
+};
 
-function deleteKategorie(index) {
-  const kat = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
-  if (kat.length <= 1) { toast('Mindestens eine Kategorie nötig',true); return; }
-  kat.splice(index, 1);
-  DB.set('kategorien', kat);
-  toast('Kategorie entfernt');
-  render();
-}
+// ── MODAL ────────────────────────────────────────────
+window.openModal  = ()=>document.getElementById('modal').classList.add('open');
+window.closeModal = e=>{if(!e||e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('open');};
 
-function allesDaten() {
-  if (!confirm('ACHTUNG: Alle Daten werden gelöscht! Wirklich fortfahren?')) return;
-  localStorage.clear();
-  DB.init();
-  toast('Daten zurückgesetzt');
-  render();
-}
-
-// ═══════════════════════════════════════════
-// FAB ACTIONS
-// ═══════════════════════════════════════════
-function openFAB() {
-  const actions = {
-    dashboard:     [
-      { label:'➕ Neue Strafe',    fn:'showNeueStrafe()' },
-      { label:'➕ Neue Buchung',   fn:'showNeueBuchung()' },
-      { label:'➕ Neuer Spieler',  fn:'showNeuerSpieler()' },
-    ],
-    strafen:       [{ label:'➕ Neue Strafe',   fn:'showNeueStrafe()' }],
-    kasse:         [{ label:'➕ Neue Buchung',  fn:'showNeueBuchung()' }],
-    spieler:       [{ label:'➕ Neuer Spieler', fn:'showNeuerSpieler()' }],
-    einstellungen: [
-      { label:'➕ Strafe zum Katalog',    fn:'navigate(\"einstellungen\")' },
-      { label:'➕ Neue Kategorie',         fn:'navigate(\"einstellungen\")' },
-    ],
-  };
-  const acts = actions[currentPage] || actions.dashboard;
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">Neu erstellen</div>
-    ${acts.map(a=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${a.fn};closeModal()">${a.label}</button>`).join('')}`;
-  openModal();
-}
-
-// ═══════════════════════════════════════════
-// NEUE STRAFE
-// ═══════════════════════════════════════════
-function showNeueStrafe() {
-  const spieler = DB.get('spieler').filter(s=>s.status==='Aktiv');
-  const katalog = DB.get('katalog');
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">Neue Strafe</div>
-    <div class="form-group">
-      <label class="form-label">Spieler</label>
-      <select class="form-input form-select" id="f-spieler">
-        <option value="">Spieler wählen…</option>
-        ${spieler.map(s=>`<option>${s.name}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Strafe</label>
-      <select class="form-input form-select" id="f-strafe" onchange="updateBetrag()">
-        <option value="">Strafe wählen…</option>
-        ${katalog.map(k=>`<option data-betrag="${k.betrag}">${k.name} (${fmt(k.betrag)})</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Betrag (€)</label>
-      <input class="form-input" id="f-betrag" type="number" step="0.01" placeholder="0.00">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Datum</label>
-      <input class="form-input" id="f-datum" type="date" value="${new Date().toISOString().split('T')[0]}">
-    </div>
-    <button class="btn btn-orange" onclick="saveNeueStrafe()">Strafe speichern</button>`;
-  // keep modal open
-}
-
-function updateBetrag() {
-  const sel = document.getElementById('f-strafe');
-  const opt = sel.options[sel.selectedIndex];
-  const betrag = opt.getAttribute('data-betrag');
-  if (betrag) document.getElementById('f-betrag').value = betrag;
-}
-
-function saveNeueStrafe() {
-  const spieler = document.getElementById('f-spieler').value;
-  const strafeSel = document.getElementById('f-strafe');
-  const strafe = strafeSel.options[strafeSel.selectedIndex]?.text?.replace(/ \(.*\)$/,'');
-  const betrag  = parseFloat(document.getElementById('f-betrag').value);
-  const datum   = document.getElementById('f-datum').value;
-  if (!spieler || !strafe || strafe==='' || isNaN(betrag) || !datum) {
-    toast('Bitte alle Felder ausfüllen', true); return;
-  }
-  const strafen = DB.get('strafen');
-  strafen.push({ id:nextId(), datum, spieler, strafe, betrag, bezahlt:false, monat:getMonat(datum) });
-  DB.set('strafen', strafen);
-  closeModal();
-  toast(`✅ Strafe für ${spieler} eingetragen!`);
-  render();
-  checkNotifications();
-}
-
-// ═══════════════════════════════════════════
-// NEUE BUCHUNG
-// ═══════════════════════════════════════════
-function showNeueBuchung() {
-  const kategorien = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">Neue Buchung</div>
-    <div class="switch-row" id="typ-switch">
-      <div class="switch-opt active" onclick="setTyp('Einnahme',this)">↑ Einnahme</div>
-      <div class="switch-opt" onclick="setTyp('Ausgabe',this)">↓ Ausgabe</div>
-    </div>
-    <input type="hidden" id="f-typ" value="Einnahme">
-    <div class="form-group">
-      <label class="form-label">Kategorie</label>
-      <select class="form-input form-select" id="f-kat">
-        ${kategorien.map(k=>`<option>${k}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Beschreibung</label>
-      <input class="form-input" id="f-desc" type="text" placeholder="z.B. Trainingsbälle…">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Betrag (€)</label>
-      <input class="form-input" id="f-betrag" type="number" step="0.01" placeholder="0.00">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Datum</label>
-      <input class="form-input" id="f-datum" type="date" value="${new Date().toISOString().split('T')[0]}">
-    </div>
-    <button class="btn btn-primary" onclick="saveNeueBuchung()">Buchung speichern</button>`;
-}
-
-function setTyp(typ, el) {
-  document.getElementById('f-typ').value = typ;
-  document.querySelectorAll('#typ-switch .switch-opt').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function saveNeueBuchung() {
-  const typ   = document.getElementById('f-typ').value;
-  const kat   = document.getElementById('f-kat').value;
-  const desc  = document.getElementById('f-desc').value;
-  const betrag= parseFloat(document.getElementById('f-betrag').value);
-  const datum = document.getElementById('f-datum').value;
-  if (!desc || isNaN(betrag) || !datum) { toast('Bitte alle Felder ausfüllen', true); return; }
-  const kasse = DB.get('kasse');
-  kasse.push({ id:nextId(), datum, typ, kategorie:kat, beschreibung:desc, betrag, monat:getMonat(datum) });
-  DB.set('kasse', kasse);
-  closeModal();
-  toast(`✅ ${typ} von ${fmt(betrag)} gespeichert!`);
-  render();
-}
-
-// ═══════════════════════════════════════════
-// NEUER SPIELER
-// ═══════════════════════════════════════════
-function showNeuerSpieler() {
-  const vergeben = DB.get('spieler').map(s=>s.nummer).join(', ');
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">Neuer Spieler</div>
-    <div class="form-group">
-      <label class="form-label">Name</label>
-      <input class="form-input" id="f-name" type="text" placeholder="Vorname Nachname">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Position</label>
-      <select class="form-input form-select" id="f-pos">
-        <option>Torwart</option><option>Abwehr</option>
-        <option>Mittelfeld</option><option>Stürmer</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Trikotnummer ${vergeben?'(vergeben: '+vergeben+')':''}</label>
-      <input class="form-input" id="f-nr" type="number" min="1" max="99" placeholder="z.B. 10">
-    </div>
-    <button class="btn btn-primary" onclick="saveNeuerSpieler()">Spieler hinzufügen</button>`;
-}
-
-function saveNeuerSpieler() {
-  const name   = document.getElementById('f-name').value.trim();
-  const pos    = document.getElementById('f-pos').value;
-  const nummer = parseInt(document.getElementById('f-nr').value);
-  if (!name || isNaN(nummer)) { toast('Bitte alle Felder ausfüllen', true); return; }
-  const spieler = DB.get('spieler');
-  if (spieler.find(s=>s.nummer===nummer)) { toast('Trikotnummer bereits vergeben!', true); return; }
-  const COLORS = ['#3b82f6','#a855f7','#22c55e','#f59e0b','#ef4444','#06b6d4','#f97316'];
-  spieler.push({ id:nextId(), name, position:pos, nummer, status:'Aktiv', color:COLORS[spieler.length%COLORS.length] });
-  DB.set('spieler', spieler);
-  closeModal();
-  toast(`✅ ${name} (#${nummer}) hinzugefügt!`);
-  render();
-}
-
-// ═══════════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════════
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-}
-function closeModal(e) {
-  if (!e || e.target === document.getElementById('modal')) {
-    document.getElementById('modal').classList.remove('open');
-  }
-}
-
-// ═══════════════════════════════════════════
-// SERVICE WORKER
-// ═══════════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-DB.init();
-render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
