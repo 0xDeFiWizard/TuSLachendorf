@@ -185,6 +185,10 @@ option { background:var(--card); }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Spieler
     </button>
+    <button class="nav-item" onclick="navigate('einstellungen')" id="nav-einstellungen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Einstellungen
+    </button>
   </nav>
 
   <!-- FAB -->
@@ -247,6 +251,9 @@ const DB = {
       ]);
       localStorage.setItem('initialized', '1');
       localStorage.setItem('ziel', '500');
+      if (!localStorage.getItem('kategorien')) {
+        this.set('kategorien', ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges','Strafen']);
+      }
     }
   }
 };
@@ -303,10 +310,11 @@ function navigate(page) {
 
 function render() {
   const screens = {
-    dashboard: renderDashboard,
-    strafen:   renderStrafen,
-    kasse:     renderKasse,
-    spieler:   renderSpieler,
+    dashboard:     renderDashboard,
+    strafen:       renderStrafen,
+    kasse:         renderKasse,
+    spieler:       renderSpieler,
+    einstellungen: renderEinstellungen,
   };
   const el = document.getElementById('screen');
   el.innerHTML = '';
@@ -551,7 +559,7 @@ function renderKasse() {
   const ausgaben  = kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
 
   const renderItem = k => `
-    <div class="list-item">
+    <div class="list-item" onclick="kasseDetail(${k.id})">
       <div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="font-size:18px">
         ${k.typ==='Einnahme'?'↑':'↓'}
       </div>
@@ -703,24 +711,229 @@ function spielerLoeschen(id) {
 }
 
 // ═══════════════════════════════════════════
+// KASSE DETAIL & LÖSCHEN
+// ═══════════════════════════════════════════
+function kasseDetail(id) {
+  const kasse = DB.get('kasse');
+  const k = kasse.find(x=>x.id===id);
+  if (!k) return;
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="width:48px;height:48px;font-size:22px;border-radius:12px">${k.typ==='Einnahme'?'↑':'↓'}</div>
+      <div>
+        <div style="font-size:18px;font-weight:700">${k.beschreibung}</div>
+        <div style="color:var(--muted);font-size:13px">${k.kategorie}</div>
+      </div>
+    </div>
+    <div class="card-sm" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="color:var(--muted);font-size:13px">Typ</span>
+        <span class="badge ${k.typ==='Einnahme'?'green':'red'}">${k.typ}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="color:var(--muted);font-size:13px">Betrag</span>
+        <span style="font-weight:700;font-family:'DM Mono',monospace;color:${k.typ==='Einnahme'?'var(--green)':'var(--red)'}">
+          ${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}
+        </span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:var(--muted);font-size:13px">Datum</span>
+        <span style="font-size:13px">${fmtDate(k.datum)}</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost" style="color:var(--red)" onclick="kasseLoeschen(${id})">🗑 Buchung löschen</button>`;
+  openModal();
+}
+
+function kasseLoeschen(id) {
+  if (!confirm('Buchung wirklich löschen?')) return;
+  DB.set('kasse', DB.get('kasse').filter(k=>k.id!==id));
+  closeModal();
+  toast('Buchung gelöscht');
+  render();
+}
+
+// ═══════════════════════════════════════════
+// EINSTELLUNGEN
+// ═══════════════════════════════════════════
+function renderEinstellungen() {
+  const katalog   = DB.get('katalog');
+  const kategorien = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
+  const ziel = localStorage.getItem('ziel') || '500';
+
+  const katRows = katalog.map(k=>`
+    <div class="list-item">
+      <div class="list-body">
+        <div class="list-title">${k.name}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace;font-size:13px">${fmt(k.betrag)}</span>
+        <button onclick="editKatalogItem(${k.id})" style="background:rgba(59,130,246,.15);color:var(--accent);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer">✏️</button>
+        <button onclick="deleteKatalogItem(${k.id})" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer">🗑</button>
+      </div>
+    </div>`).join('');
+
+  const katRows2 = kategorien.map((k,i)=>`
+    <div class="list-item">
+      <div class="list-body"><div class="list-title">${k}</div></div>
+      <button onclick="deleteKategorie(${i})" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer">🗑</button>
+    </div>`).join('');
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Einstellungen</div>
+        <div class="topbar-sub">Katalog, Kategorien & Ziel</div>
+      </div>
+    </div>
+    <div style="padding:16px 0 0">
+
+      <div class="sec">Strafenziel</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <input class="form-input" id="ziel-input" type="number" value="${ziel}" style="flex:1" placeholder="500">
+          <button class="btn btn-primary" style="width:auto;padding:12px 18px" onclick="saveZiel()">Speichern</button>
+        </div>
+      </div>
+
+      <div class="sec">Strafenkatalog</div>
+      <div class="card">
+        ${katRows || '<div class="empty"><div class="empty-text">Keine Einträge</div></div>'}
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <input class="form-input" id="new-kat-name" type="text" placeholder="Strafe (z.B. Zu spät)" style="flex:1">
+          <input class="form-input" id="new-kat-betrag" type="number" placeholder="€" style="width:80px">
+          <button onclick="addKatalogItem()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer;font-weight:700;flex-shrink:0">+</button>
+        </div>
+      </div>
+
+      <div class="sec">Buchungskategorien</div>
+      <div class="card">
+        ${katRows2 || '<div class="empty"><div class="empty-text">Keine Kategorien</div></div>'}
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <input class="form-input" id="new-kategorie" type="text" placeholder="Neue Kategorie…" style="flex:1">
+          <button onclick="addKategorie()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer;font-weight:700;flex-shrink:0">+</button>
+        </div>
+      </div>
+
+      <div class="sec">Daten</div>
+      <div class="card">
+        <button class="btn btn-ghost" style="color:var(--red)" onclick="allesDaten()">⚠️ Alle Daten zurücksetzen</button>
+      </div>
+    </div>`;
+}
+
+function saveZiel() {
+  const val = parseFloat(document.getElementById('ziel-input').value);
+  if (isNaN(val)||val<=0) { toast('Ungültiger Betrag',true); return; }
+  localStorage.setItem('ziel', val);
+  toast('✅ Ziel gespeichert: '+fmt(val));
+  render();
+}
+
+function addKatalogItem() {
+  const name   = document.getElementById('new-kat-name').value.trim();
+  const betrag = parseFloat(document.getElementById('new-kat-betrag').value);
+  if (!name || isNaN(betrag)) { toast('Name und Betrag ausfüllen',true); return; }
+  const katalog = DB.get('katalog');
+  katalog.push({ id:nextId(), name, betrag });
+  DB.set('katalog', katalog);
+  toast('✅ Strafe hinzugefügt');
+  render();
+}
+
+function editKatalogItem(id) {
+  const katalog = DB.get('katalog');
+  const k = katalog.find(x=>x.id===id);
+  if (!k) return;
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-title">Strafe bearbeiten</div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-input" id="ek-name" type="text" value="${k.name}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Betrag (€)</label>
+      <input class="form-input" id="ek-betrag" type="number" step="0.01" value="${k.betrag}">
+    </div>
+    <button class="btn btn-primary" onclick="saveKatalogItem(${id})">Speichern</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteKatalogItem(${id})">🗑 Löschen</button>`;
+  openModal();
+}
+
+function saveKatalogItem(id) {
+  const name   = document.getElementById('ek-name').value.trim();
+  const betrag = parseFloat(document.getElementById('ek-betrag').value);
+  if (!name || isNaN(betrag)) { toast('Felder ausfüllen',true); return; }
+  const katalog = DB.get('katalog');
+  const k = katalog.find(x=>x.id===id);
+  if (k) { k.name=name; k.betrag=betrag; DB.set('katalog',katalog); }
+  closeModal();
+  toast('✅ Gespeichert');
+  render();
+}
+
+function deleteKatalogItem(id) {
+  if (!confirm('Strafe aus dem Katalog löschen?')) return;
+  DB.set('katalog', DB.get('katalog').filter(k=>k.id!==id));
+  closeModal();
+  toast('Gelöscht');
+  render();
+}
+
+function addKategorie() {
+  const val = document.getElementById('new-kategorie').value.trim();
+  if (!val) { toast('Name eingeben',true); return; }
+  const kat = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
+  if (kat.includes(val)) { toast('Kategorie existiert bereits',true); return; }
+  kat.push(val);
+  DB.set('kategorien', kat);
+  toast('✅ Kategorie hinzugefügt');
+  render();
+}
+
+function deleteKategorie(index) {
+  const kat = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
+  if (kat.length <= 1) { toast('Mindestens eine Kategorie nötig',true); return; }
+  kat.splice(index, 1);
+  DB.set('kategorien', kat);
+  toast('Kategorie entfernt');
+  render();
+}
+
+function allesDaten() {
+  if (!confirm('ACHTUNG: Alle Daten werden gelöscht! Wirklich fortfahren?')) return;
+  localStorage.clear();
+  DB.init();
+  toast('Daten zurückgesetzt');
+  render();
+}
+
+// ═══════════════════════════════════════════
 // FAB ACTIONS
 // ═══════════════════════════════════════════
 function openFAB() {
   const actions = {
-    dashboard: [
-      { label:'➕ Neue Strafe',   icon:'🟠', fn:'showNeueStrafe()' },
-      { label:'➕ Neue Buchung',  icon:'💳', fn:'showNeueBuchung()' },
-      { label:'➕ Neuer Spieler', icon:'👤', fn:'showNeuerSpieler()' },
+    dashboard:     [
+      { label:'➕ Neue Strafe',    fn:'showNeueStrafe()' },
+      { label:'➕ Neue Buchung',   fn:'showNeueBuchung()' },
+      { label:'➕ Neuer Spieler',  fn:'showNeuerSpieler()' },
     ],
-    strafen:  [{ label:'➕ Neue Strafe',  fn:'showNeueStrafe()' }],
-    kasse:    [{ label:'➕ Neue Buchung', fn:'showNeueBuchung()' }],
-    spieler:  [{ label:'➕ Neuer Spieler',fn:'showNeuerSpieler()' }],
+    strafen:       [{ label:'➕ Neue Strafe',   fn:'showNeueStrafe()' }],
+    kasse:         [{ label:'➕ Neue Buchung',  fn:'showNeueBuchung()' }],
+    spieler:       [{ label:'➕ Neuer Spieler', fn:'showNeuerSpieler()' }],
+    einstellungen: [
+      { label:'➕ Strafe zum Katalog',    fn:'navigate(\"einstellungen\")' },
+      { label:'➕ Neue Kategorie',         fn:'navigate(\"einstellungen\")' },
+    ],
   };
   const acts = actions[currentPage] || actions.dashboard;
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-handle"></div>
     <div class="modal-title">Neu erstellen</div>
-    ${acts.map(a=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${a.fn}">${a.label}</button>`).join('')}`;
+    ${acts.map(a=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${a.fn};closeModal()">${a.label}</button>`).join('')}`;
   openModal();
 }
 
@@ -788,6 +1001,7 @@ function saveNeueStrafe() {
 // NEUE BUCHUNG
 // ═══════════════════════════════════════════
 function showNeueBuchung() {
+  const kategorien = DB.get('kategorien') || ['Ausrüstung/Einkauf','Veranstaltung','Mitgliedsbeitrag','Sonstiges'];
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-handle"></div>
     <div class="modal-title">Neue Buchung</div>
@@ -799,10 +1013,7 @@ function showNeueBuchung() {
     <div class="form-group">
       <label class="form-label">Kategorie</label>
       <select class="form-input form-select" id="f-kat">
-        <option>Ausrüstung/Einkauf</option>
-        <option>Veranstaltung</option>
-        <option>Mitgliedsbeitrag</option>
-        <option>Sonstiges</option>
+        ${kategorien.map(k=>`<option>${k}</option>`).join('')}
       </select>
     </div>
     <div class="form-group">
