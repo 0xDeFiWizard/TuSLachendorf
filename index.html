@@ -461,18 +461,22 @@ window.openFAB = function(){
   if(!S.isAdmin){toast('Nur Admin',true);return;}
   const acts={dashboard:[{l:'➕ Neue Strafe',f:'showStr()'},{l:'➕ Neue Buchung',f:'showBuch()'},{l:'➕ Neuer Spieler',f:'showSp()'}],strafen:[{l:'➕ Neue Strafe',f:'showStr()'}],kasse:[{l:'➕ Neue Buchung',f:'showBuch()'}],spieler:[{l:'➕ Neuer Spieler',f:'showSp()'}],einstellungen:[{l:'➕ Strafenkatalog',f:'navigate("einstellungen")'},{l:'➕ Neue Kategorie',f:'navigate("einstellungen")'}]};
   const a=acts[currentPage]||acts.dashboard;
-  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neu erstellen</div>${a.map(x=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${x.f};closeModal()">${x.l}</button>`).join('')}`;
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neu erstellen</div>${a.map(x=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${x.f}">${x.l}</button>`).join('')}`;
   openModal();
 };
 
 window.showStr = function(){
   const spl=S.spieler.filter(s=>s.status==='Aktiv');
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
   document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neue Strafe</div>
   <div class="form-group"><label class="form-label">Spieler</label><select class="form-input form-select" id="fs"><option value="">Spieler wählen…</option>${spl.map(s=>`<option>${s.name}</option>`).join('')}</select></div>
   <div class="form-group"><label class="form-label">Strafe</label><select class="form-input form-select" id="fst" onchange="upB()"><option value="">Strafe wählen…</option>${S.katalog.map(k=>`<option data-b="${k.betrag}">${k.name} (${fmt(k.betrag)})</option>`).join('')}</select></div>
   <div class="form-group"><label class="form-label">Betrag (€)</label><input class="form-input" id="fb" type="number" step="0.01" placeholder="0.00"></div>
   <div class="form-group"><label class="form-label">Datum</label><input class="form-input" id="fd" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
   <button class="btn btn-orange" onclick="savStr()">Strafe speichern</button>`;
+  openModal();
+  },50);
 };
 window.upB = function(){const s=document.getElementById('fst');const o=s.options[s.selectedIndex];const b=o.getAttribute('data-b');if(b)document.getElementById('fb').value=b;};
 window.savStr = async function(){
@@ -485,6 +489,8 @@ window.savStr = async function(){
 };
 
 window.showBuch = function(){
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
   document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neue Buchung</div>
   <div class="switch-row" id="tsw"><div class="switch-opt active" onclick="setT('Einnahme',this)">↑ Einnahme</div><div class="switch-opt" onclick="setT('Ausgabe',this)">↓ Ausgabe</div></div>
   <input type="hidden" id="ft" value="Einnahme">
@@ -493,6 +499,8 @@ window.showBuch = function(){
   <div class="form-group"><label class="form-label">Betrag (€)</label><input class="form-input" id="fbb" type="number" step="0.01" placeholder="0.00"></div>
   <div class="form-group"><label class="form-label">Datum</label><input class="form-input" id="fdd" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
   <button class="btn btn-primary" onclick="savBuch()">Buchung speichern</button>`;
+  openModal();
+  },50);
 };
 window.setT = function(t,el){document.getElementById('ft').value=t;document.querySelectorAll('#tsw .switch-opt').forEach(e=>e.classList.remove('active'));el.classList.add('active');};
 window.savBuch = async function(){
@@ -505,11 +513,15 @@ window.savBuch = async function(){
 
 window.showSp = function(){
   const vg=S.spieler.map(s=>s.nummer).join(', ');
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
   document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neuer Spieler</div>
   <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fn" type="text" placeholder="Vorname Nachname"></div>
   <div class="form-group"><label class="form-label">Position</label><select class="form-input form-select" id="fp"><option>Torwart</option><option>Abwehr</option><option>Mittelfeld</option><option>Stürmer</option></select></div>
   <div class="form-group"><label class="form-label">Trikotnummer${vg?' (vergeben: '+vg+')':''}</label><input class="form-input" id="fnr" type="number" min="1" max="99" placeholder="z.B. 10"></div>
   <button class="btn btn-primary" onclick="savSp()">Spieler hinzufügen</button>`;
+  openModal();
+  },50);
 };
 window.savSp = async function(){
   const n=document.getElementById('fn').value.trim(); const p=document.getElementById('fp').value; const nr=parseInt(document.getElementById('fnr').value);
