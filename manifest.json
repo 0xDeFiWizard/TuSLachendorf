@@ -1,14 +1,15 @@
 {
-  "name": "Vereinskasse",
-  "short_name": "Vereinskasse",
-  "description": "Kasse & Strafen für euren Verein",
-  "start_url": "/",
+  "name": "TuS Lachendorf",
+  "short_name": "TuS Kasse",
+  "description": "Vereinskasse & Strafen für TuS Lachendorf",
+  "start_url": "/TuSLachendorf/",
+  "scope": "/TuSLachendorf/",
   "display": "standalone",
   "background_color": "#0f1117",
   "theme_color": "#0f1117",
   "orientation": "portrait",
   "icons": [
-    { "src": "icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
-    { "src": "icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+    { "src": "icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
