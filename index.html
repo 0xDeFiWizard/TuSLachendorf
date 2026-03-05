@@ -159,10 +159,11 @@ import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc,
   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ════════════════════════════════════════════════════
-// KONFIGURATION — hier Passwörter ändern
+// KONFIGURATION — SHA256 Hashes (nicht das echte Passwort!)
+// Zum Ändern: neuen Hash auf https://emn178.github.io/online-tools/sha256.html generieren
 // ════════════════════════════════════════════════════
-const TEAM_PW  = "TuS2025";    // Passwort für alle Spieler
-const ADMIN_PW = "Admin2025";  // Nur Kassenwart + Trainer
+const TEAM_PW  = "a36b6c85899d80bf2578f561930622aaee4b94b86d347bb5a2434f488bc7aab2";
+const ADMIN_PW = "f0d69d50df9d46dbb367d8ab8265d051e4e15cd15277230b5c8cd0b0aba18fca";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzkQwnx2CdNXwQ8n4qd6v6VaQeVRlk4lk",
@@ -194,11 +195,16 @@ function toast(msg,err=false){
 }
 
 // ── LOGIN ────────────────────────────────────────────
-window.doLogin = function(){
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+window.doLogin = async function(){
   const pw = document.getElementById('pw-input').value.trim();
   const er = document.getElementById('login-error');
-  if(pw===ADMIN_PW){ S.isAdmin=true; boot(); }
-  else if(pw===TEAM_PW){ S.isAdmin=false; boot(); }
+  const hash = await sha256(pw);
+  if(hash===ADMIN_PW){ S.isAdmin=true; boot(); }
+  else if(hash===TEAM_PW){ S.isAdmin=false; boot(); }
   else{ er.textContent='❌ Falsches Passwort'; document.getElementById('pw-input').value=''; setTimeout(()=>er.textContent='',3000); }
 };
 
@@ -260,30 +266,33 @@ function render(){
 
 // ── DASHBOARD ────────────────────────────────────────
 function rDash(){
-  const ein=S.kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
-  const aus=S.kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
+  const sichtbar=S.kasse.filter(k=>!k.versteckt);
+  const ein=sichtbar.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
+  const aus=sichtbar.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
+  const einGes=S.kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
+  const ausGes=S.kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
   const stG=S.strafen.reduce((a,b)=>a+b.betrag,0);
   const stO=S.strafen.filter(s=>!s.bezahlt).reduce((a,b)=>a+b.betrag,0);
   const oA=S.strafen.filter(s=>!s.bezahlt).length;
   const prog=Math.min(stG/(S.ziel||500)*100,100).toFixed(0);
   const mD={};MO.forEach(m=>mD[m]={e:0,a:0});
-  S.kasse.forEach(k=>{if(mD[k.monat]){if(k.typ==='Einnahme')mD[k.monat].e+=k.betrag;else mD[k.monat].a+=k.betrag;}});
-  const m6=MO.slice(0,6); const mx=Math.max(...m6.map(m=>Math.max(mD[m].e,mD[m].a)),1);
-  const bars=m6.map(m=>`<div class="chart-bar-col"><div style="display:flex;gap:2px;align-items:flex-end;height:74px"><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].e/mx*70,2)}px;background:var(--green)"></div><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].a/mx*70,2)}px;background:var(--red)"></div></div><span class="chart-lbl">${m}</span></div>`).join('');
+  sichtbar.forEach(k=>{if(mD[k.monat]){if(k.typ==='Einnahme')mD[k.monat].e+=k.betrag;else mD[k.monat].a+=k.betrag;}});
+  const mx=Math.max(...MO.map(m=>Math.max(mD[m].e,mD[m].a)),1);
+  const bars=MO.map(m=>`<div class="chart-bar-col"><div style="display:flex;gap:2px;align-items:flex-end;height:74px"><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].e/mx*70,2)}px;background:var(--green)"></div><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].a/mx*70,2)}px;background:var(--red)"></div></div><span class="chart-lbl">${m}</span></div>`).join('');
   const rec=S.strafen.slice(0,3).map(s=>`<div class="list-item"><div class="player-avatar" style="background:${gcol(s.spieler)}22;color:${gcol(s.spieler)};font-size:12px">${ini(s.spieler)}</div><div class="list-body"><div class="list-title">${s.spieler}</div><div class="list-sub">${s.strafe}</div></div><div class="list-right"><div class="list-amount orange">${fmt(s.betrag)}</div><span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span></div></div>`).join('');
   return `<div class="topbar"><div><div class="topbar-title">⚽ TuS Lachendorf</div><div class="topbar-sub"><span class="sync-dot ${S.online?'':'off'}"></span>${S.online?'Live':'Offline'} · ${new Date().toLocaleDateString('de-DE',{day:'numeric',month:'long'})}</div></div><button class="avatar ${S.isAdmin?'admin':'user'}" onclick="${S.isAdmin?'adminOut()':'tryAdmin()'}">${S.isAdmin?'ADM':'USR'}</button></div>
   <div style="padding:16px 0 0">
     ${!S.isAdmin?`<div class="ro-banner">👁 Nur-Lesen · Tippe USR um Admin zu werden</div>`:''}
     <div class="kpi-grid">
-      <div class="kpi blue"><div class="kpi-label">Kassenstand</div><div class="kpi-value">${fmt(ein-aus)}</div></div>
+      <div class="kpi blue"><div class="kpi-label">Kassenstand</div><div class="kpi-value">${fmt(einGes-ausGes)}</div></div>
       <div class="kpi orange"><div class="kpi-label">Strafen Gesamt</div><div class="kpi-value">${fmt(stG)}</div></div>
       <div class="kpi green"><div class="kpi-label">Einnahmen</div><div class="kpi-value">${fmt(ein)}</div></div>
       <div class="kpi red"><div class="kpi-label">Ausgaben</div><div class="kpi-value">${fmt(aus)}</div></div>
     </div>
     ${oA>0?`<div class="card" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);cursor:pointer" onclick="navigate('strafen')"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">⚠️</span><div><div style="font-size:14px;font-weight:700;color:var(--red)">${oA} offene Strafe${oA>1?'n':''}</div><div style="font-size:12px;color:var(--muted)">${fmt(stO)} nicht bezahlt</div></div></div></div>`:''}
     <div class="card"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:600">Strafenziel</span><span style="font-size:12px;color:var(--muted)">${fmt(stG)} / ${fmt(S.ziel)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">${prog}% erreicht</div></div>
-    <div class="sec">Einnahmen vs. Ausgaben</div>
-    <div class="card"><div style="display:flex;gap:12px;margin-bottom:8px"><span style="font-size:11px;color:var(--green)">● Einnahmen</span><span style="font-size:11px;color:var(--red)">● Ausgaben</span></div><div class="chart-bar-wrap">${bars}</div></div>
+    <div class="sec">Einnahmen vs. Ausgaben (Jan–Dez)</div>
+    <div class="card" style="overflow-x:auto"><div style="display:flex;gap:12px;margin-bottom:8px"><span style="font-size:11px;color:var(--green)">● Einnahmen</span><span style="font-size:11px;color:var(--red)">● Ausgaben</span></div><div class="chart-bar-wrap" style="min-width:520px">${bars}</div></div>
     <div class="sec">Letzte Strafen</div>
     <div class="card">${rec||'<div style="text-align:center;padding:20px;color:var(--muted)">Keine Strafen</div>'}</div>
   </div>`;
@@ -293,8 +302,9 @@ window.tryAdmin = function(){
   document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">🔐 Admin-Zugang</div><div style="color:var(--muted);font-size:14px;margin-bottom:16px">Nur Kassenwart &amp; Trainer</div><div class="form-group"><label class="form-label">Admin-Passwort</label><input class="form-input" id="apw" type="password" placeholder="••••" style="text-align:center;letter-spacing:3px;font-size:20px" onkeydown="if(event.key==='Enter')chkAdmin()"></div><button class="btn btn-primary" onclick="chkAdmin()">Bestätigen</button><div id="aerr" style="color:var(--red);font-size:13px;text-align:center;margin-top:8px"></div>`;
   openModal(); setTimeout(()=>document.getElementById('apw')?.focus(),400);
 };
-window.chkAdmin = function(){
-  if(document.getElementById('apw').value===ADMIN_PW){S.isAdmin=true;document.getElementById('fab').style.display='flex';closeModal();toast('✅ Admin-Modus aktiv');render();}
+window.chkAdmin = async function(){
+  const hash=await sha256(document.getElementById('apw').value);
+  if(hash===ADMIN_PW){S.isAdmin=true;document.getElementById('fab').style.display='flex';closeModal();toast('✅ Admin-Modus aktiv');render();}
   else document.getElementById('aerr').textContent='❌ Falsches Passwort';
 };
 window.adminOut = function(){S.isAdmin=false;document.getElementById('fab').style.display='none';toast('Admin-Modus beendet');render();};
@@ -338,12 +348,26 @@ window.strDel = async function(id){
 
 // ── KASSE ────────────────────────────────────────────
 function rKasse(){
-  const ein=S.kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
-  const aus=S.kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
-  const ri=k=>`<div class="list-item" onclick="kasDetail('${k.id}')"><div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="font-size:18px">${k.typ==='Einnahme'?'↑':'↓'}</div><div class="list-body"><div class="list-title">${k.beschreibung}</div><div class="list-sub">${k.kategorie} · ${k.monat}</div></div><div class="list-right"><div class="list-amount ${k.typ==='Einnahme'?'green':'red'}">${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}</div><div class="list-date">${fmtD(k.datum)}</div></div></div>`;
-  return `<div class="topbar"><div><div class="topbar-title">Kasse</div><div class="topbar-sub">Stand: ${fmt(ein-aus)}</div></div></div>
+  const sichtbar=S.kasse.filter(k=>!k.versteckt);
+  const versteckt=S.kasse.filter(k=>k.versteckt);
+  const ein=sichtbar.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
+  const aus=sichtbar.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
+  const einGes=S.kasse.filter(k=>k.typ==='Einnahme').reduce((a,b)=>a+b.betrag,0);
+  const ausGes=S.kasse.filter(k=>k.typ==='Ausgabe').reduce((a,b)=>a+b.betrag,0);
+  const ri=k=>`<div class="list-item" onclick="kasDetail('${k.id}')" style="${k.versteckt?'opacity:.5':''}">
+    <div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="font-size:18px">${k.versteckt?'🙈':k.typ==='Einnahme'?'↑':'↓'}</div>
+    <div class="list-body"><div class="list-title">${k.beschreibung}</div>
+    <div class="list-sub">${k.kategorie} · ${k.monat}${k.versteckt?' · ausgeblendet':''}</div></div>
+    <div class="list-right"><div class="list-amount ${k.typ==='Einnahme'?'green':'red'}">${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}</div>
+    <div class="list-date">${fmtD(k.datum)}</div></div></div>`;
+  return `<div class="topbar"><div><div class="topbar-title">Kasse</div>
+  <div class="topbar-sub">Stand (alle): ${fmt(einGes-ausGes)}</div></div></div>
   <div style="padding:16px 0 0">
-    <div class="kpi-grid"><div class="kpi green"><div class="kpi-label">Einnahmen</div><div class="kpi-value">${fmt(ein)}</div></div><div class="kpi red"><div class="kpi-label">Ausgaben</div><div class="kpi-value">${fmt(aus)}</div></div></div>
+    <div class="kpi-grid">
+      <div class="kpi green"><div class="kpi-label">Einnahmen sichtbar</div><div class="kpi-value">${fmt(ein)}</div></div>
+      <div class="kpi red"><div class="kpi-label">Ausgaben sichtbar</div><div class="kpi-value">${fmt(aus)}</div></div>
+    </div>
+    ${versteckt.length>0?`<div class="ro-banner" style="color:var(--muted);margin-bottom:12px">🙈 ${versteckt.length} Buchung${versteckt.length>1?'en':''} ausgeblendet · im Kassenstand enthalten</div>`:''}
     <div class="sec">Alle Buchungen</div>
     <div class="card">${S.kasse.map(ri).join('')||'<div style="text-align:center;padding:20px;color:var(--muted)">Keine Buchungen</div>'}</div>
   </div>`;
@@ -351,14 +375,57 @@ function rKasse(){
 window.kasDetail = function(id){
   const k=S.kasse.find(x=>x.id===id); if(!k) return;
   document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px"><div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="width:48px;height:48px;font-size:22px;border-radius:12px">${k.typ==='Einnahme'?'↑':'↓'}</div><div><div style="font-size:18px;font-weight:700">${k.beschreibung}</div><div style="color:var(--muted);font-size:13px">${k.kategorie}</div></div></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div class="list-icon ${k.typ==='Einnahme'?'green':'red'}" style="width:48px;height:48px;font-size:22px;border-radius:12px">${k.typ==='Einnahme'?'↑':'↓'}</div>
+    <div><div style="font-size:18px;font-weight:700">${k.beschreibung}</div><div style="color:var(--muted);font-size:13px">${k.kategorie}</div></div>
+  </div>
   <div class="card-sm" style="margin-bottom:14px">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Typ</span><span class="badge ${k.typ==='Einnahme'?'green':'red'}">${k.typ}</span></div>
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Betrag</span><span style="font-weight:700;font-family:'DM Mono',monospace;color:${k.typ==='Einnahme'?'var(--green)':'var(--red)'}"> ${k.typ==='Einnahme'?'+':'−'}${fmt(k.betrag)}</span></div>
-    <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Datum</span><span style="font-size:13px">${fmtD(k.datum)}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Datum</span><span style="font-size:13px">${fmtD(k.datum)}</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Status</span><span class="badge ${k.versteckt?'orange':'green'}">${k.versteckt?'Ausgeblendet':'Sichtbar'}</span></div>
   </div>
-  ${S.isAdmin?`<button class="btn btn-ghost" style="color:var(--red)" onclick="kasDel('${id}')">🗑 Buchung löschen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center">Nur Admin kann löschen</div>'}`;
+  ${S.isAdmin?`
+    <button class="btn btn-primary" style="margin-bottom:8px" onclick="kasEdit('${id}')">✏️ Bearbeiten</button>
+    <button class="btn btn-ghost" style="margin-bottom:8px" onclick="kasToggle('${id}')">${k.versteckt?'👁 Einblenden':'🙈 Ausblenden'}</button>
+    <button class="btn btn-ghost" style="color:var(--red)" onclick="kasDel('${id}')">🗑 Löschen</button>`
+  :'<div style="color:var(--muted);font-size:13px;text-align:center">Nur Admin kann Änderungen vornehmen</div>'}`;
   openModal();
+};
+window.kasToggle = async function(id){
+  const k=S.kasse.find(x=>x.id===id); if(!k) return;
+  await setDoc(doc(db,'kasse',id),{...k,versteckt:!k.versteckt});
+  closeModal(); toast(k.versteckt?'👁 Eingeblendet':'🙈 Ausgeblendet');
+};
+window.kasEdit = function(id){
+  const k=S.kasse.find(x=>x.id===id); if(!k) return;
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+    <div class="modal-title">✏️ Buchung bearbeiten</div>
+    <div class="form-group"><label class="form-label">Beschreibung</label>
+      <input class="form-input" id="ed-desc" type="text" value="${k.beschreibung}"></div>
+    <div class="form-group"><label class="form-label">Betrag (€)</label>
+      <input class="form-input" id="ed-betrag" type="number" step="0.01" value="${k.betrag}"></div>
+    <div class="form-group"><label class="form-label">Kategorie</label>
+      <select class="form-input form-select" id="ed-kat">
+        ${S.kategorien.map(kat=>`<option ${kat===k.kategorie?'selected':''}>${kat}</option>`).join('')}
+      </select></div>
+    <div class="form-group"><label class="form-label">Datum</label>
+      <input class="form-input" id="ed-datum" type="date" value="${k.datum}"></div>
+    <button class="btn btn-primary" onclick="kasEditSave('${id}')">✅ Speichern</button>`;
+    openModal();
+  },50);
+};
+window.kasEditSave = async function(id){
+  const k=S.kasse.find(x=>x.id===id); if(!k) return;
+  const desc=document.getElementById('ed-desc').value.trim();
+  const betrag=parseFloat(document.getElementById('ed-betrag').value);
+  const kat=document.getElementById('ed-kat').value;
+  const datum=document.getElementById('ed-datum').value;
+  if(!desc||isNaN(betrag)||!datum){toast('Alle Felder ausfüllen',true);return;}
+  await setDoc(doc(db,'kasse',id),{...k,beschreibung:desc,betrag,kategorie:kat,datum,monat:getMo(datum)});
+  closeModal(); toast('✅ Buchung aktualisiert');
 };
 window.kasDel = async function(id){
   if(!confirm('Buchung löschen?')) return;
@@ -409,7 +476,7 @@ function rSettings(){
     ${S.isAdmin?`<div style="margin-top:12px;display:flex;gap:8px"><input class="form-input" id="nkn" type="text" placeholder="Strafe…" style="flex:1"><input class="form-input" id="nkb" type="number" placeholder="€" style="width:75px"><button onclick="addKat()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer">+</button></div>`:''}</div>
     <div class="sec">Buchungskategorien</div>
     <div class="card">${kg}${S.isAdmin?`<div style="margin-top:12px;display:flex;gap:8px"><input class="form-input" id="nkg" type="text" placeholder="Neue Kategorie…" style="flex:1"><button onclick="addKg()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 14px;font-size:20px;cursor:pointer">+</button></div>`:''}</div>
-    ${S.isAdmin?`<div class="sec">Passwörter (aktuell)</div><div class="card"><div class="card-sm" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">Team: ${TEAM_PW}<br>Admin: ${ADMIN_PW}</div><div style="color:var(--muted);font-size:12px;margin-top:10px">Zum Ändern: in index.html TEAM_PW und ADMIN_PW anpassen</div></div>`:''}
+    ${S.isAdmin?`<div class="sec">Passwörter</div><div class="card"><div style="color:var(--muted);font-size:13px">Passwörter sind als SHA256-Hash gespeichert.<br><br>Zum Ändern: neuen Hash auf <strong style="color:var(--accent)">emn178.github.io/online-tools/sha256.html</strong> generieren und in index.html bei TEAM_PW / ADMIN_PW eintragen.</div></div>`:''}
   </div>`;
 }
 window.saveZiel = async function(){
