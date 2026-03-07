@@ -276,7 +276,9 @@ function rDash(){
   const oA=S.strafen.filter(s=>!s.bezahlt).length;
   const prog=Math.min(stG/(S.ziel||500)*100,100).toFixed(0);
   const mD={};MO.forEach(m=>mD[m]={e:0,a:0});
-  sichtbar.forEach(k=>{if(mD[k.monat]){if(k.typ==='Einnahme')mD[k.monat].e+=k.betrag;else mD[k.monat].a+=k.betrag;}});
+  const moMap={'Januar':'Jan','Februar':'Feb','März':'Mrz','April':'Apr','Mai':'Mai','Juni':'Jun','Juli':'Jul','August':'Aug','September':'Sep','Oktober':'Okt','November':'Nov','Dezember':'Dez'};
+  const normMo=m=>moMap[m]||m;
+  sichtbar.forEach(k=>{const mo=normMo(k.monat);if(mD[mo]){if(k.typ==='Einnahme')mD[mo].e+=k.betrag;else mD[mo].a+=k.betrag;}});
   const mx=Math.max(...MO.map(m=>Math.max(mD[m].e,mD[m].a)),1);
   const bars=MO.map(m=>`<div class="chart-bar-col"><div style="display:flex;gap:2px;align-items:flex-end;height:74px"><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].e/mx*70,2)}px;background:var(--green)"></div><div class="chart-bar" style="width:45%;height:${Math.max(mD[m].a/mx*70,2)}px;background:var(--red)"></div></div><span class="chart-lbl">${m}</span></div>`).join('');
   const rec=S.strafen.slice(0,3).map(s=>`<div class="list-item"><div class="player-avatar" style="background:${gcol(s.spieler)}22;color:${gcol(s.spieler)};font-size:12px">${ini(s.spieler)}</div><div class="list-body"><div class="list-title">${s.spieler}</div><div class="list-sub">${s.strafe}</div></div><div class="list-right"><div class="list-amount orange">${fmt(s.betrag)}</div><span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span></div></div>`).join('');
@@ -332,8 +334,40 @@ window.strDetail = function(id){
     <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Status</span><span class="badge ${s.bezahlt?'green':'red'}">${s.bezahlt?'Bezahlt':'Offen'}</span></div>
   </div>
   ${S.isAdmin&&!s.bezahlt?`<button class="btn btn-green" style="margin-bottom:8px" onclick="strBez('${id}')">✓ Als bezahlt markieren</button>`:''}
-  ${S.isAdmin?`<button class="btn btn-ghost" style="color:var(--red)" onclick="strDel('${id}')">🗑 Löschen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center;margin-top:8px">Nur Admin kann Änderungen vornehmen</div>'}`;
+  ${S.isAdmin?`
+  <button class="btn btn-primary" style="margin-bottom:8px" onclick="strEdit('${id}')">✏️ Strafe bearbeiten</button>
+  <button class="btn btn-ghost" style="color:var(--red)" onclick="strDel('${id}')">🗑 Löschen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center;margin-top:8px">Nur Admin kann Änderungen vornehmen</div>'}`;
   openModal();
+};
+window.strEdit = function(id){
+  const s=S.strafen.find(x=>x.id===id); if(!s) return;
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
+    const spielerOpts=S.spieler.map(sp=>`<option ${sp.name===s.spieler?'selected':''}>${sp.name}</option>`).join('');
+    const strOpts=S.katalog.map(k=>`<option ${k.name===s.strafe?'selected':''}>${k.name}</option>`).join('');
+    document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+    <div class="modal-title">✏️ Strafe bearbeiten</div>
+    <div class="form-group"><label class="form-label">Spieler</label>
+      <select class="form-input form-select" id="ste-sp">${spielerOpts}</select></div>
+    <div class="form-group"><label class="form-label">Strafe</label>
+      <select class="form-input form-select" id="ste-str">${strOpts}</select></div>
+    <div class="form-group"><label class="form-label">Betrag (€)</label>
+      <input class="form-input" id="ste-b" type="number" step="0.01" value="${s.betrag}"></div>
+    <div class="form-group"><label class="form-label">Datum</label>
+      <input class="form-input" id="ste-d" type="date" value="${s.datum}"></div>
+    <button class="btn btn-primary" onclick="strEditSave('${id}')">✅ Speichern</button>`;
+    openModal();
+  },50);
+};
+window.strEditSave = async function(id){
+  const s=S.strafen.find(x=>x.id===id); if(!s) return;
+  const spieler=document.getElementById('ste-sp').value;
+  const strafe=document.getElementById('ste-str').value;
+  const betrag=parseFloat(document.getElementById('ste-b').value);
+  const datum=document.getElementById('ste-d').value;
+  if(!spieler||!strafe||isNaN(betrag)||!datum){toast('Alle Felder ausfüllen',true);return;}
+  await setDoc(doc(db,'strafen',id),{...s,spieler,strafe,betrag,datum,monat:getMo(datum)});
+  closeModal(); toast('✅ Strafe aktualisiert');
 };
 window.strBez = async function(id){
   const s=S.strafen.find(x=>x.id===id); if(!s) return;
@@ -457,11 +491,55 @@ window.spDetail = function(id){
   ${S.isAdmin?`
   <div class="form-group"><label class="form-label">Farbe</label><div style="display:flex;gap:8px;flex-wrap:wrap">${COLS.map(c=>`<div onclick="spCol('${id}','${c}')" style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===sp.color?'#fff':'transparent'}"></div>`).join('')}</div></div>
   <div class="form-group"><label class="form-label">Status</label><select class="form-input form-select" onchange="spStat('${id}',this.value)"><option ${sp.status==='Aktiv'?'selected':''}>Aktiv</option><option ${sp.status==='Inaktiv'?'selected':''}>Inaktiv</option></select></div>
+  <button class="btn btn-primary" style="margin-bottom:8px" onclick="spEdit('${id}')">✏️ Spieler bearbeiten</button>
   <button class="btn btn-ghost" style="color:var(--red)" onclick="spDel('${id}')">🗑 Spieler entfernen</button>`:'<div style="color:var(--muted);font-size:13px;text-align:center">Nur Admin kann Spieler bearbeiten</div>'}`;
   openModal();
 };
 window.spCol = async function(id,c){const sp=S.spieler.find(x=>x.id===id);if(sp)await setDoc(doc(db,'spieler',id),{...sp,color:c});spDetail(id);};
 window.spStat = async function(id,st){const sp=S.spieler.find(x=>x.id===id);if(sp){await setDoc(doc(db,'spieler',id),{...sp,status:st});toast('Status aktualisiert');render();}};
+window.spEdit = function(id){
+  const sp=S.spieler.find(x=>x.id===id); if(!sp) return;
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+    <div class="modal-title">✏️ Spieler bearbeiten</div>
+    <div class="form-group"><label class="form-label">Name</label>
+      <input class="form-input" id="se-name" type="text" value="${sp.name}"></div>
+    <div class="form-group"><label class="form-label">Position</label>
+      <select class="form-input form-select" id="se-pos">
+        <option ${sp.position==='Torwart'?'selected':''}>Torwart</option>
+        <option ${sp.position==='Abwehr'?'selected':''}>Abwehr</option>
+        <option ${sp.position==='Mittelfeld'?'selected':''}>Mittelfeld</option>
+        <option ${sp.position==='Stürmer'?'selected':''}>Stürmer</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Trikotnummer</label>
+      <input class="form-input" id="se-nr" type="number" min="1" max="99" value="${sp.nummer}"></div>
+    <button class="btn btn-primary" onclick="spEditSave('${id}')">✅ Speichern</button>`;
+    openModal();
+  },50);
+};
+window.spEditSave = async function(id){
+  const sp=S.spieler.find(x=>x.id===id); if(!sp) return;
+  const name=document.getElementById('se-name').value.trim();
+  const pos=document.getElementById('se-pos').value;
+  const nr=parseInt(document.getElementById('se-nr').value);
+  if(!name||isNaN(nr)){toast('Felder ausfüllen',true);return;}
+  const nrKonflikt=S.spieler.find(s=>s.nummer===nr&&s.id!==id);
+  if(nrKonflikt){toast('Nummer bereits vergeben!',true);return;}
+  const alterName=sp.name;
+  await setDoc(doc(db,'spieler',id),{...sp,name,position:pos,nummer:nr});
+  // Strafen umbenennen wenn Name geändert
+  if(alterName!==name){
+    const betroffene=S.strafen.filter(s=>s.spieler===alterName);
+    for(const s of betroffene){
+      await setDoc(doc(db,'strafen',s.id),{...s,spieler:name});
+    }
+    toast(`✅ Gespeichert · ${betroffene.length} Strafe${betroffene.length!==1?'n':''} aktualisiert`);
+  } else {
+    toast('✅ Spieler aktualisiert');
+  }
+  closeModal(); render();
+};
 window.spDel = async function(id){if(!confirm('Spieler löschen?'))return;await deleteDoc(doc(db,'spieler',id));closeModal();toast('Spieler entfernt');};
 
 // ── EINSTELLUNGEN ────────────────────────────────────
