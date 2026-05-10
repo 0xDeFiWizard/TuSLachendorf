@@ -137,9 +137,13 @@ option{background:var(--card)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Spieler
     </button>
+    <button class="nav-item" onclick="navigate('inventar')" id="nav-inventar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      Inventar
+    </button>
     <button class="nav-item" onclick="navigate('einstellungen')" id="nav-einstellungen">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Einstellungen
+      Mehr
     </button>
   </nav>
   <button class="fab" id="fab" onclick="openFAB()" style="display:none">
@@ -178,7 +182,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 
-const S = { isAdmin:false, strafen:[], kasse:[], spieler:[], katalog:[], kategorien:[], ziel:500, online:true };
+const S = { isAdmin:false, strafen:[], kasse:[], spieler:[], katalog:[], kategorien:[], inventar:[], invKategorien:[], ziel:500, online:true, invModus:'inventar' };
 
 const fmt = n => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n);
 const fmtD = d => { try{return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}catch{return d}};
@@ -216,6 +220,18 @@ function boot(){
   navigate('dashboard');
   window.addEventListener('online', ()=>{S.online=true; toast('🟢 Online')});
   window.addEventListener('offline',()=>{S.online=false; toast('🔴 Offline',true)});
+
+  // Inventar
+  onSnapshot(doc(db,'config','inventar'), s=>{
+    if(s.exists()){
+      const d=s.data();
+      S.inventar=d.artikel||[];
+      S.invKategorien=d.kategorien||['Getränke','Essen','Ausrüstung','Sonstiges'];
+    } else {
+      setDoc(doc(db,'config','inventar'),{artikel:[],kategorien:['Getränke','Essen','Ausrüstung','Sonstiges']});
+    }
+    if(currentPage==='inventar') render();
+  });
 }
 
 // ── FIRESTORE LISTENERS ──────────────────────────────
@@ -257,7 +273,7 @@ window.navigate = function(p){
 };
 
 function render(){
-  const map={dashboard:rDash,strafen:rStrafen,kasse:rKasse,spieler:rSpieler,einstellungen:rSettings};
+  const map={dashboard:rDash,strafen:rStrafen,kasse:rKasse,spieler:rSpieler,inventar:rInventar,einstellungen:rSettings};
   const el=document.getElementById('screen');
   el.innerHTML=map[currentPage]?.() || '';
   el.classList.add('fade-in');
@@ -543,6 +559,207 @@ window.spEditSave = async function(id){
 window.spDel = async function(id){if(!confirm('Spieler löschen?'))return;await deleteDoc(doc(db,'spieler',id));closeModal();toast('Spieler entfernt');};
 
 // ── EINSTELLUNGEN ────────────────────────────────────
+// ── INVENTAR ─────────────────────────────────────────────
+function rInventar(){
+  const modus=S.invModus||'inventar';
+  const artikel=S.inventar||[];
+  const einkauf=artikel.filter(a=>a.benoetigt);
+  const gekauft=einkauf.filter(a=>a.gekauft).length;
+  const katGruppen={};
+  S.invKategorien.forEach(k=>katGruppen[k]=[]);
+  artikel.forEach(a=>{const k=a.kategorie||'Sonstiges';if(!katGruppen[k])katGruppen[k]=[];katGruppen[k].push(a);});
+
+  const renderArtikel=a=>{
+    const ok=a.menge>=a.sollMenge;
+    return `<div class="list-item" onclick="invDetail('${a.id}')">
+      <div style="width:38px;height:38px;border-radius:10px;background:${ok?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${a.emoji||'📦'}</div>
+      <div class="list-body"><div class="list-title">${a.name}</div>
+      <div class="list-sub">${a.kategorie}${a.benoetigt?' · <span style="color:var(--orange)">Einkaufsliste</span>':''}</div></div>
+      <div class="list-right">
+        <div style="font-size:15px;font-weight:700;font-family:'DM Mono',monospace;color:${ok?'var(--green)':'var(--red)'}">${a.menge}/${a.sollMenge}</div>
+        <div style="font-size:11px;color:var(--muted)">${a.einheit}</div>
+      </div></div>`;
+  };
+
+  const renderEinkauf=a=>`<div class="list-item">
+    <div onclick="invToggleGekauft('${a.id}')" style="width:38px;height:38px;border-radius:10px;background:${a.gekauft?'rgba(34,197,94,.15)':'rgba(245,158,11,.15)'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer">${a.gekauft?'✅':'🛒'}</div>
+    <div class="list-body" style="${a.gekauft?'opacity:.4;text-decoration:line-through':''}">
+      <div class="list-title">${a.name}</div><div class="list-sub">${a.kategorie}</div>
+    </div>
+    <div class="list-right" style="${a.gekauft?'opacity:.4':''}">
+      <div style="font-size:15px;font-weight:700;font-family:'DM Mono',monospace;color:var(--orange)">${Math.max(a.sollMenge-a.menge,1)} ${a.einheit}</div>
+      <div style="font-size:11px;color:var(--muted)">kaufen</div>
+    </div></div>`;
+
+  const inventarHTML=Object.entries(katGruppen).filter(([,arr])=>arr.length>0)
+    .map(([kat,arr])=>`<div class="sec">${kat}</div><div class="card">${arr.map(renderArtikel).join('')}</div>`).join('')
+    ||'<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px">📦</div>Noch keine Artikel<br><span style="font-size:12px">+ drücken um anzufangen</span></div>';
+
+  const einkaufHTML=einkauf.length===0
+    ?'<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:12px">🛒</div>Einkaufsliste ist leer</div>'
+    :`<div class="card" style="margin-bottom:12px;background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--muted)">${gekauft} von ${einkauf.length} erledigt</span>
+          ${gekauft>0?`<button onclick="invResetEinkauf()" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Reset</button>`:''}
+        </div>
+        <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${einkauf.length?gekauft/einkauf.length*100:0}%"></div></div>
+      </div>
+      <div class="card">${einkauf.map(renderEinkauf).join('')}</div>`;
+
+  return `<div class="topbar"><div><div class="topbar-title">📋 Inventar</div>
+    <div class="topbar-sub">${artikel.length} Artikel · ${einkauf.length} auf Einkaufsliste</div></div></div>
+  <div style="padding:16px 0 0">
+    <div class="switch-row" id="inv-sw">
+      <div class="switch-opt ${modus==='inventar'?'active':''}" onclick="setInvModus('inventar')">📦 Inventar</div>
+      <div class="switch-opt ${modus==='einkauf'?'active':''}" onclick="setInvModus('einkauf')">🛒 Einkaufen</div>
+    </div>
+    ${modus==='inventar'?inventarHTML:einkaufHTML}
+  </div>`;
+}
+
+window.setInvModus=function(m){S.invModus=m;render();};
+
+window.invToggleGekauft=async function(id){
+  const a=S.inventar.find(x=>x.id===id);if(!a)return;
+  const artikel=S.inventar.map(x=>x.id===id?{...x,gekauft:!x.gekauft}:x);
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  toast(a.gekauft?'↩ Zurückgesetzt':'✅ Gekauft');
+};
+
+window.invResetEinkauf=async function(){
+  if(!confirm('Alle Haken zurücksetzen?'))return;
+  const artikel=S.inventar.map(x=>({...x,gekauft:false}));
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  toast('Reset erledigt');
+};
+
+window.invDetail=function(id){
+  if(!S.isAdmin){return;}
+  const a=S.inventar.find(x=>x.id===id);if(!a)return;
+  const ok=a.menge>=a.sollMenge;
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+    <div style="width:56px;height:56px;border-radius:14px;background:${ok?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'};display:flex;align-items:center;justify-content:center;font-size:28px">${a.emoji||'📦'}</div>
+    <div><div style="font-size:20px;font-weight:700">${a.name}</div><div style="color:var(--muted);font-size:13px">${a.kategorie}</div></div>
+  </div>
+  <div class="card-sm" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Aktuell</span><span style="font-weight:700;font-family:'DM Mono',monospace;color:${ok?'var(--green)':'var(--red)'}"> ${a.menge} ${a.einheit}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Soll-Menge</span><span style="font-family:'DM Mono',monospace">${a.sollMenge} ${a.einheit}</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Einkaufsliste</span><span class="badge ${a.benoetigt?'orange':'green'}">${a.benoetigt?'Ja':'Nein'}</span></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button onclick="invMenge('${id}',-1)" style="flex:1;padding:14px;background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:var(--radius-sm);font-size:22px;cursor:pointer;font-weight:700">−</button>
+    <div style="flex:2;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:20px;font-weight:700;font-family:'DM Mono',monospace">${a.menge} ${a.einheit}</div>
+    <button onclick="invMenge('${id}',+1)" style="flex:1;padding:14px;background:rgba(34,197,94,.15);color:var(--green);border:none;border-radius:var(--radius-sm);font-size:22px;cursor:pointer;font-weight:700">+</button>
+  </div>
+  <button class="btn btn-ghost" style="margin-bottom:8px" onclick="invToggleBenoetigt('${id}')">${a.benoetigt?'✅ Von Einkaufsliste entfernen':'🛒 Zur Einkaufsliste'}</button>
+  <button class="btn btn-primary" style="margin-bottom:8px" onclick="invEdit('${id}')">✏️ Bearbeiten</button>
+  <button class="btn btn-ghost" style="color:var(--red)" onclick="invDel('${id}')">🗑 Löschen</button>`;
+  openModal();
+};
+
+window.invMenge=async function(id,delta){
+  const a=S.inventar.find(x=>x.id===id);if(!a)return;
+  const menge=Math.max(0,a.menge+delta);
+  const artikel=S.inventar.map(x=>x.id===id?{...x,menge,benoetigt:menge<x.sollMenge}:x);
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  invDetail(id);
+};
+
+window.invToggleBenoetigt=async function(id){
+  const a=S.inventar.find(x=>x.id===id);if(!a)return;
+  const artikel=S.inventar.map(x=>x.id===id?{...x,benoetigt:!x.benoetigt,gekauft:false}:x);
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  closeModal();toast(a.benoetigt?'Von Liste entfernt':'🛒 Zur Einkaufsliste');
+};
+
+window.invEdit=function(id){
+  const a=S.inventar.find(x=>x.id===id);if(!a)return;
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+    <div class="modal-title">✏️ Artikel bearbeiten</div>
+    <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="ie-name" type="text" value="${a.name}"></div>
+    <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="ie-emoji" type="text" value="${a.emoji||'📦'}" style="font-size:22px;text-align:center"></div>
+    <div class="form-group"><label class="form-label">Kategorie</label><select class="form-input form-select" id="ie-kat">${S.invKategorien.map(k=>`<option ${k===a.kategorie?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Einheit</label><input class="form-input" id="ie-einheit" type="text" value="${a.einheit}"></div>
+    <div class="form-group"><label class="form-label">Aktuelle Menge</label><input class="form-input" id="ie-menge" type="number" min="0" value="${a.menge}"></div>
+    <div class="form-group"><label class="form-label">Soll-Menge</label><input class="form-input" id="ie-soll" type="number" min="0" value="${a.sollMenge}"></div>
+    <button class="btn btn-primary" onclick="invEditSave('${id}')">✅ Speichern</button>`;
+    openModal();
+  },50);
+};
+
+window.invEditSave=async function(id){
+  const a=S.inventar.find(x=>x.id===id);if(!a)return;
+  const name=document.getElementById('ie-name').value.trim();
+  const emoji=document.getElementById('ie-emoji').value.trim()||'📦';
+  const kat=document.getElementById('ie-kat').value;
+  const einheit=document.getElementById('ie-einheit').value.trim();
+  const menge=parseInt(document.getElementById('ie-menge').value);
+  const sollMenge=parseInt(document.getElementById('ie-soll').value);
+  if(!name||!einheit||isNaN(menge)||isNaN(sollMenge)){toast('Alle Felder ausfüllen',true);return;}
+  const artikel=S.inventar.map(x=>x.id===id?{...x,name,emoji,kategorie:kat,einheit,menge,sollMenge,benoetigt:menge<sollMenge}:x);
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  closeModal();toast('✅ Aktualisiert');
+};
+
+window.invDel=async function(id){
+  if(!confirm('Artikel löschen?'))return;
+  const artikel=S.inventar.filter(x=>x.id!==id);
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  closeModal();toast('Gelöscht');
+};
+
+window.showNeuArtikel=function(){
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+    <div class="modal-title">➕ Neuer Artikel</div>
+    <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="na-name" type="text" placeholder="z.B. Bier"></div>
+    <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="na-emoji" type="text" placeholder="🍺" style="font-size:22px;text-align:center"></div>
+    <div class="form-group"><label class="form-label">Kategorie</label><select class="form-input form-select" id="na-kat">${S.invKategorien.map(k=>`<option>${k}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Einheit (z.B. Kisten, Packungen)</label><input class="form-input" id="na-einheit" type="text" placeholder="Kisten"></div>
+    <div class="form-group"><label class="form-label">Aktuelle Menge</label><input class="form-input" id="na-menge" type="number" min="0" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">Soll-Menge (Mindestbestand)</label><input class="form-input" id="na-soll" type="number" min="1" placeholder="2"></div>
+    <button class="btn btn-primary" onclick="savNeuArtikel()">✅ Hinzufügen</button>`;
+    openModal();
+  },50);
+};
+
+window.savNeuArtikel=async function(){
+  const name=document.getElementById('na-name').value.trim();
+  const emoji=document.getElementById('na-emoji').value.trim()||'📦';
+  const kat=document.getElementById('na-kat').value;
+  const einheit=document.getElementById('na-einheit').value.trim();
+  const menge=parseInt(document.getElementById('na-menge').value);
+  const sollMenge=parseInt(document.getElementById('na-soll').value);
+  if(!name||!einheit||isNaN(menge)||isNaN(sollMenge)){toast('Alle Felder ausfüllen',true);return;}
+  const artikel=[...S.inventar,{id:nid(),name,emoji,kategorie:kat,einheit,menge,sollMenge,benoetigt:menge<sollMenge,gekauft:false}];
+  await setDoc(doc(db,'config','inventar'),{artikel,kategorien:S.invKategorien});
+  closeModal();toast('✅ '+name+' hinzugefügt');
+};
+
+window.showNeuInvKat=function(){
+  document.getElementById('modal').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>
+    <div class="modal-title">➕ Neue Kategorie</div>
+    <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="nik-name" type="text" placeholder="z.B. Snacks"></div>
+    <button class="btn btn-primary" onclick="savNeuInvKat()">✅ Hinzufügen</button>`;
+    openModal();
+  },50);
+};
+
+window.savNeuInvKat=async function(){
+  const name=document.getElementById('nik-name').value.trim();
+  if(!name){toast('Name eingeben',true);return;}
+  if(S.invKategorien.includes(name)){toast('Existiert bereits',true);return;}
+  const kategorien=[...S.invKategorien,name];
+  await setDoc(doc(db,'config','inventar'),{artikel:S.inventar,kategorien});
+  closeModal();toast('✅ Kategorie hinzugefügt');
+};
+
 function rSettings(){
   const kr=S.katalog.map(k=>`<div class="list-item"><div class="list-body"><div class="list-title">${k.name}</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:var(--orange);font-family:'DM Mono',monospace;font-size:13px">${fmt(k.betrag)}</span>${S.isAdmin?`<button onclick="editKat('${k.id}')" style="background:rgba(59,130,246,.15);color:var(--accent);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">✏️</button><button onclick="delKat('${k.id}')" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">🗑</button>`:''}</div></div>`).join('');
   const kg=S.kategorien.map((k,i)=>`<div class="list-item"><div class="list-body"><div class="list-title">${k}</div></div>${S.isAdmin?`<button onclick="delKg(${i})" style="background:rgba(239,68,68,.15);color:var(--red);border:none;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">🗑</button>`:''}</div>`).join('');
@@ -604,7 +821,7 @@ window.delKg = async function(i){
 // ── FAB ──────────────────────────────────────────────
 window.openFAB = function(){
   if(!S.isAdmin){toast('Nur Admin',true);return;}
-  const acts={dashboard:[{l:'➕ Neue Strafe',f:'showStr()'},{l:'➕ Neue Buchung',f:'showBuch()'},{l:'➕ Neuer Spieler',f:'showSp()'}],strafen:[{l:'➕ Neue Strafe',f:'showStr()'}],kasse:[{l:'➕ Neue Buchung',f:'showBuch()'}],spieler:[{l:'➕ Neuer Spieler',f:'showSp()'}],einstellungen:[{l:'➕ Strafenkatalog',f:'navigate("einstellungen")'},{l:'➕ Neue Kategorie',f:'navigate("einstellungen")'}]};
+  const acts={dashboard:[{l:'➕ Neue Strafe',f:'showStr()'},{l:'➕ Neue Buchung',f:'showBuch()'},{l:'➕ Neuer Spieler',f:'showSp()'},{l:'➕ Inventar Artikel',f:'showNeuArtikel()'}],strafen:[{l:'➕ Neue Strafe',f:'showStr()'}],kasse:[{l:'➕ Neue Buchung',f:'showBuch()'}],spieler:[{l:'➕ Neuer Spieler',f:'showSp()'}],inventar:[{l:'➕ Neuer Artikel',f:'showNeuArtikel()'},{l:'➕ Neue Kategorie',f:'showNeuInvKat()'}],einstellungen:[{l:'➕ Strafenkatalog',f:'navigate("einstellungen")'},{l:'➕ Neue Kategorie',f:'navigate("einstellungen")'}]};
   const a=acts[currentPage]||acts.dashboard;
   document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><div class="modal-title">Neu erstellen</div>${a.map(x=>`<button class="btn btn-ghost" style="margin-bottom:10px;justify-content:flex-start" onclick="${x.f}">${x.l}</button>`).join('')}`;
   openModal();
